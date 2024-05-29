@@ -50,6 +50,7 @@
 .container-body {
   padding: 24px;
   background-color: rgba(0, 0, 0, 0.03);
+  border-radius: 24px;
 }
 .container-head {
   padding-bottom: 12px;

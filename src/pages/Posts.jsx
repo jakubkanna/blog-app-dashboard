@@ -3,7 +3,8 @@ import formatTimestamp from "../lib/formatTimestamp";
 import PostStatus from "../components/PostStatus";
 import "../styles/Posts.scss";
 import { Link } from "react-router-dom";
-import { Edit, Trash } from "lucide-react";
+import { Edit } from "lucide-react";
+import ButtonDelete from "../components/ButtonDelete";
 
 export default function Posts() {
   const [posts, setPosts] = useState([]);
@@ -45,17 +46,11 @@ export default function Posts() {
             <li key={post._id} className="post-list-item">
               <h2>{post.title}</h2>
               <p>{formatTimestamp(post.timestamp)}</p>
-              <p>
-                <PostStatus isPublic={post.public} />
-              </p>
-
+              <PostStatus isPublic={post.public} />
               <Link to={`/edit/${post._id}`}>
                 <Edit />
               </Link>
-
-              <Link to={`/delete/${post._id}`}>
-                <Trash />
-              </Link>
+              <ButtonDelete props={{ data: post, type: "posts" }} />
             </li>
           ))}
         </ul>
