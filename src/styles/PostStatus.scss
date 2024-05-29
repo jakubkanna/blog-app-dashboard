@@ -1,0 +1,16 @@
+.post-status {
+  max-width: fit-content;
+  .published {
+    background-color: rgb(179, 255, 0);
+    color: black;
+    padding: 5px;
+    border-radius: 5px;
+  }
+
+  .unpublished {
+    background-color: grey;
+    color: black;
+    padding: 5px;
+    border-radius: 5px;
+  }
+}

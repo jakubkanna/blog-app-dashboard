@@ -1,0 +1,15 @@
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+.menu {
+  display: flex;
+  gap: 12px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+}

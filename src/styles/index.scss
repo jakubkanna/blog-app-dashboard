@@ -1,6 +1,6 @@
 :root {
-  --primary-color: #646cff;
-  --secondary-color: #535bf2;
+  --primary-color: #040404;
+  --secondary-color: #f7f7f7;
   --color-grey: #262829;
   --background-dark: #242424;
   --background-super-dark: #151515;
@@ -14,12 +14,21 @@ body {
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
   background-color: var(--background-dark);
+  margin: 0;
 }
-
+html,
+body {
+  height: 100%;
+}
 a {
   font-weight: 500;
-  color: var(--primary-color);
+
+  color: var(--secondary-color);
+
   text-decoration: inherit;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 a:hover {
   color: var(--secondary-color);
@@ -28,17 +37,25 @@ a:hover {
 button {
   border-radius: 8px;
   border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
   background-color: var(--background-super-dark);
   cursor: pointer;
   transition: border-color 0.25s, background-color 0.25s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  max-height: max-content;
 }
+
+button svg {
+  height: 12px;
+  width: 12px;
+}
+
 button:hover {
   border-color: var(--primary-color);
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
@@ -49,6 +66,7 @@ button:focus-visible {
     color: var(--color-grey);
     background-color: var(--background-light);
   }
+
   a:hover {
     color: var(--primary-color);
   }
@@ -62,10 +80,28 @@ button:focus-visible {
     color: var(--color-grey);
     background-color: var(--background-light);
   }
+  a {
+    color: var(--primary-color);
+  }
   a:hover {
     color: var(--primary-color);
   }
   button {
     background-color: var(--background-dark);
   }
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
 }
