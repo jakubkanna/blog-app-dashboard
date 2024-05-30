@@ -5,6 +5,7 @@ import Posts from "./pages/Posts.jsx";
 import Comments from "./pages/Comments.jsx";
 import Settings from "./pages/Settings.jsx";
 import usePermissions from "./lib/usePermissions.js";
+import Create from "./pages/Create.jsx";
 
 const ProtectedAdmin = () => {
   const { isAdmin } = usePermissions();
@@ -38,6 +39,12 @@ const routes = [
           {
             path: "posts",
             element: <Posts />,
+            children: [
+              {
+                path: "create",
+                element: <Create />,
+              },
+            ],
           },
           {
             path: "comments",

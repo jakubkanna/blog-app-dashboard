@@ -1,0 +1,16 @@
+.post-editor-body {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+.new-block {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+.new-block-btn {
+  max-width: max-content;
+}
+.new-block-blocks-btns {
+  display: flex;
+}

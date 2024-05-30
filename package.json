@@ -10,11 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tinymce/tinymce-react": "^5.0.1",
+    "dotenv": "^16.4.5",
+    "fs-extra": "^11.2.0",
     "lucide-react": "^0.379.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.23.1",
-    "sass": "^1.77.2"
+    "sass": "^1.77.2",
+    "tinymce": "^7.1.1"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",

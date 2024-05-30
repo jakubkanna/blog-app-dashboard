@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import formatTimestamp from "../lib/formatTimestamp";
 import PostStatus from "../components/PostStatus";
 import "../styles/Posts.scss";
-import { Link } from "react-router-dom";
+import { Link, Outlet } from "react-router-dom";
 import { Edit } from "lucide-react";
 import ButtonDelete from "../components/ButtonDelete";
 
@@ -38,9 +38,12 @@ export default function Posts() {
     <div className="container">
       <div className="container-head">
         <h2>Posts</h2>
-        <button>Add New</button>
+        <button>
+          <Link to={"create"}>Add New</Link>
+        </button>
       </div>
       <div className="container-body">
+        <Outlet />
         <ul className="post-list">
           {posts.map((post) => (
             <li key={post._id} className="post-list-item">
