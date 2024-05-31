@@ -14,3 +14,17 @@
 .new-block-blocks-btns {
   display: flex;
 }
+.editor-block-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.post-editor-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.post-editor-footer {
+  display: flex;
+  gap: 12px;
+}

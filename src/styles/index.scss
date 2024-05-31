@@ -1,9 +1,10 @@
 :root {
-  --primary-color: #040404;
+  --primary-color: rgb(5, 5, 5);
   --secondary-color: #f7f7f7;
   --color-grey: #262829;
-  --background-dark: #242424;
-  --background-super-dark: #151515;
+  --background-dark: rgba(36, 36, 36, 0.05);
+  --background-strong-dark: rgba(36, 36, 36, 1);
+  --background-super-dark: rgb(21, 21, 21);
   --background-light: #e6e6e6;
 }
 
@@ -13,7 +14,7 @@ body {
   font-weight: 400;
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: var(--background-dark);
+  background-color: var(--background-strong-dark);
   margin: 0;
 }
 html,
@@ -78,14 +79,13 @@ button:focus-visible {
   a {
     color: var(--primary-color);
   }
-  button a {
-    color: var(--secondary-color);
-  }
+
   a:hover {
     color: var(--primary-color);
   }
   button {
     background-color: var(--background-dark);
+    color: var(--primary-color);
   }
 }
 

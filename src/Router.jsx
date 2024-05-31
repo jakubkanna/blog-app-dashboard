@@ -1,11 +1,16 @@
-import { Outlet, RouterProvider, createBrowserRouter } from "react-router-dom";
+import {
+  Outlet,
+  RouterProvider,
+  createBrowserRouter,
+  Navigate,
+} from "react-router-dom";
 import Login from "./pages/Login.jsx";
 import App from "./App.jsx";
 import Posts from "./pages/Posts.jsx";
 import Comments from "./pages/Comments.jsx";
 import Settings from "./pages/Settings.jsx";
 import usePermissions from "./lib/usePermissions.js";
-import Create from "./pages/Create.jsx";
+import CreatePost from "./pages/CreatePost.jsx";
 
 const ProtectedAdmin = () => {
   const { isAdmin } = usePermissions();
@@ -24,11 +29,22 @@ const SettingsRoute = {
   element: <Settings />,
 };
 
+const Redirect = () => {
+  const { isLoggedIn, isAdmin } = usePermissions();
+
+  if (!isLoggedIn) {
+    return <Navigate to="/" />;
+  }
+
+  return isAdmin ? <Navigate to="/admin" /> : <Navigate to="/user" />;
+};
+
 const routes = [
   {
     path: "/",
     element: <Login />,
   },
+
   {
     element: <ProtectedAdmin />,
     children: [
@@ -42,7 +58,7 @@ const routes = [
             children: [
               {
                 path: "create",
-                element: <Create />,
+                element: <CreatePost />,
               },
             ],
           },

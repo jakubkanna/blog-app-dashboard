@@ -1,6 +1,6 @@
-import { Link } from "react-router-dom";
 import { ThemeToggleBtn } from "./ToggleThemeButton";
 import "../styles/Header.css";
+import Logout from "./Logout";
 
 export default function Header() {
   return (
@@ -12,7 +12,7 @@ export default function Header() {
             <ThemeToggleBtn />
           </li>
           <li className="menu-item">
-            <Link to={"/logout"}>Logout</Link>
+            <Logout />
           </li>
         </ul>
       </nav>
