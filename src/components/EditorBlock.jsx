@@ -8,10 +8,10 @@ const EditorBlock = ({ params }) => {
   const [blockIndex, setBlockIndex] = useState(params.block.index);
   const [blockContent, setBlockContent] = useState(params.block.content);
 
-  // Ensure params.block.content is always up-to-date with the blockContent state
+  //update block content
   useEffect(() => {
     params.block.content = blockContent;
-  }, [blockContent, params.block]);
+  }, [blockContent, params.block.content]);
 
   // Update blockIndex when params.block.index changes
   useEffect(() => {
@@ -19,8 +19,6 @@ const EditorBlock = ({ params }) => {
   }, [params.block.index]);
 
   const handleIndexChange = (event) => {
-    console.log("index change");
-
     const newIndex = parseInt(event.target.value, 10);
     if (!isNaN(newIndex) && newIndex > 0 && newIndex <= params.totalBlocks) {
       setBlockIndex(newIndex);
@@ -28,14 +26,12 @@ const EditorBlock = ({ params }) => {
   };
 
   const handleNewIndexSubmit = () => {
-    console.log("index submit");
     setIsEditing(false);
     // Update the block order with the new block index
     params.updateBlockOrder(params.block.index - 1, blockIndex);
   };
 
   const handleDelete = () => {
-    console.log("delete");
     params.deleteBlock(params.block.id);
   };
 
@@ -67,7 +63,10 @@ const EditorBlock = ({ params }) => {
   const BlockRenderer = () => {
     const rendererParams = {
       blockContent,
-      setBlockContent,
+      setBlockContent: (content) => {
+        setBlockContent(content);
+        params.updateBlockContent(params.block.id, content);
+      },
       blockIndex: params.block.index,
     };
 

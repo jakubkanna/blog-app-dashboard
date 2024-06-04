@@ -1,51 +1,76 @@
 import { useState, useContext, useEffect } from "react";
 import { Plus, Trash } from "lucide-react";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import "../styles/Create.scss";
 import EditorBlock from "../components/EditorBlock";
 import { AuthContext } from "../context/AuthContext";
 
-export default function CreatePost() {
-  const [title, setTitle] = useState("Untitled");
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [showButtons, setShowButtons] = useState(false);
-  const [blocks, setBlocks] = useState([]);
-  const { token } = useContext(AuthContext);
+export default function Editor() {
+  const [title, setTitle] = useState(() => {
+    const savedData = sessionStorage.getItem("postEditorData");
+    return savedData ? JSON.parse(savedData).title : "Untitled";
+  });
 
-  const blocksNb = blocks.length;
+  const [isEditingInput, setIsEditingInput] = useState(false);
+  const [showButtons, setShowButtons] = useState(false);
+  const [blocks, setBlocks] = useState(() => {
+    const savedData = sessionStorage.getItem("postEditorData");
+    return savedData ? JSON.parse(savedData).blocks : [];
+  });
+
+  const { token } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const [dirty, setDirty] = useOutletContext();
+
   useEffect(() => {
-    console.log("blocks:", JSON.stringify(blocks));
-  }, [blocks]);
+    const savedData = sessionStorage.getItem("postEditorData");
+    if (savedData) {
+      const { title, blocks } = JSON.parse(savedData);
+      setTitle(title);
+      setBlocks(blocks);
+    }
+  }, []);
+
+  useEffect(() => {
+    const postEditorData = { title, blocks };
+    sessionStorage.setItem("postEditorData", JSON.stringify(postEditorData));
+  }, [blocks, title]);
 
   const handleTitleClick = () => {
-    setIsEditingTitle(true);
+    setIsEditingInput(true);
   };
 
   const handleTitleChange = (event) => {
     setTitle(event.target.value);
   };
 
-  const handlePlusClick = () => {
+  const handleNewBlockBtn = () => {
     setShowButtons(!showButtons);
   };
 
   const addBlock = (type) => {
-    setBlocks([...blocks, { type, id: blocksNb, content: "" }]);
+    setBlocks([...blocks, { type, id: blocks.length, content: "" }]);
+  };
+
+  const deleteBlock = (id) => {
+    setBlocks(blocks.filter((block) => block.id !== id));
   };
 
   const updateBlockOrder = (index, newIndex) => {
     const blocksCopy = [...blocks];
-
-    // Remove the block from its current position
     const [removedBlock] = blocksCopy.splice(index, 1);
-
-    // Re-insert the block at the new position
-    blocksCopy.splice(newIndex - 1, 0, removedBlock); //subtract 1 from newIndex because array indexes are zero-based
-
-    // Update the state with the new order
+    blocksCopy.splice(newIndex - 1, 0, removedBlock);
     setBlocks(blocksCopy);
   };
 
-  const handleFormSubmitMock = (e) => {
+  const updateBlockContent = (id, content) => {
+    const updatedBlocks = blocks.map((block) =>
+      block.id === id ? { ...block, content } : block
+    );
+    setBlocks(updatedBlocks);
+  };
+
+  const handleSave = (e) => {
     e.preventDefault();
     const requestBody = {
       title,
@@ -53,32 +78,33 @@ export default function CreatePost() {
       public: e.target.name === "publish",
     };
     console.log(requestBody);
+    setDirty(false);
+    sessionStorage.removeItem("postEditorData");
+    navigate("/admin/posts");
   };
-  const deleteBlock = (id) => {
-    setBlocks(blocks.filter((block) => block.id !== id));
-  };
+
   return (
-    <form method="post" onSubmit={handleFormSubmitMock}>
+    <form method="post" onSubmit={handleSave}>
       <div className="post-editor">
         <div className="post-editor-header">
           <label htmlFor="newPostTitle">
             <small>Title</small>
           </label>
           <div className="post-editor-header-content">
-            {isEditingTitle ? (
+            {isEditingInput ? (
               <input
                 type="text"
                 name="title"
                 id="newPostTitle"
                 value={title}
                 onChange={handleTitleChange}
-                onBlur={() => setIsEditingTitle(false)}
+                onBlur={() => setIsEditingInput(false)}
                 autoFocus
               />
             ) : (
               <h1 onClick={handleTitleClick}>{title}</h1>
             )}
-            <button>
+            <button type="button" onClick={() => setTitle("")}>
               <Trash />
             </button>
           </div>
@@ -88,9 +114,10 @@ export default function CreatePost() {
             block.index = index + 1;
             const params = {
               block,
-              totalBlocks: blocksNb,
+              totalBlocks: blocks.length,
               updateBlockOrder,
               deleteBlock,
+              updateBlockContent,
             };
 
             return <EditorBlock key={block.id} params={params} />;
@@ -99,7 +126,7 @@ export default function CreatePost() {
             <button
               className="new-block-btn"
               type="button"
-              onClick={handlePlusClick}>
+              onClick={handleNewBlockBtn}>
               <small>Add new block</small> <Plus />
             </button>
             {showButtons && (

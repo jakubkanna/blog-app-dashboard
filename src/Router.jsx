@@ -9,19 +9,17 @@ import App from "./App.jsx";
 import Posts from "./pages/Posts.jsx";
 import Comments from "./pages/Comments.jsx";
 import Settings from "./pages/Settings.jsx";
-import usePermissions from "./lib/usePermissions.js";
-import CreatePost from "./pages/CreatePost.jsx";
+import usePermissions from "./hooks/usePermissions.js";
+import Editor from "./pages/Editor.jsx";
 
 const ProtectedAdmin = () => {
-  const { isAdmin } = usePermissions();
+  const { isAdmin, isLoading } = usePermissions();
 
-  return isAdmin && <Outlet />;
-};
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
-const ProtectedUser = () => {
-  const { isLoggedIn } = usePermissions();
-
-  return isLoggedIn && <Outlet />;
+  return isAdmin ? <Outlet /> : <Navigate to={"/"} />;
 };
 
 const SettingsRoute = {
@@ -29,27 +27,17 @@ const SettingsRoute = {
   element: <Settings />,
 };
 
-const Redirect = () => {
-  const { isLoggedIn, isAdmin } = usePermissions();
-
-  if (!isLoggedIn) {
-    return <Navigate to="/" />;
-  }
-
-  return isAdmin ? <Navigate to="/admin" /> : <Navigate to="/user" />;
-};
-
 const routes = [
   {
     path: "/",
     element: <Login />,
   },
-
   {
+    path: "/admin",
     element: <ProtectedAdmin />,
     children: [
       {
-        path: "/admin",
+        path: "",
         element: <App />,
         children: [
           {
@@ -58,7 +46,7 @@ const routes = [
             children: [
               {
                 path: "create",
-                element: <CreatePost />,
+                element: <Editor />,
               },
             ],
           },
@@ -68,16 +56,6 @@ const routes = [
           },
           SettingsRoute,
         ],
-      },
-    ],
-  },
-  {
-    element: <ProtectedUser />,
-    children: [
-      {
-        path: "/user",
-        element: <App />,
-        children: [SettingsRoute],
       },
     ],
   },

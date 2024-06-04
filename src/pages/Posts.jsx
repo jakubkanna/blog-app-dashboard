@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
-import formatTimestamp from "../lib/formatTimestamp";
+import formatTimestamp from "../hooks/formatTimestamp";
 import PostStatus from "../components/PostStatus";
 import "../styles/Posts.scss";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useOutletContext } from "react-router-dom";
 import { Edit } from "lucide-react";
 import ButtonDelete from "../components/ButtonDelete";
 
 export default function Posts() {
   const [posts, setPosts] = useState([]);
+  const [dirty, setDirty] = useOutletContext();
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -43,7 +44,7 @@ export default function Posts() {
         </button>
       </div>
       <div className="container-body">
-        <Outlet />
+        <Outlet context={[dirty, setDirty]} />
         <ul className="post-list">
           {posts.map((post) => (
             <li key={post._id} className="post-list-item">
