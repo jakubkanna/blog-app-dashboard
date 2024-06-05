@@ -6,8 +6,11 @@
   --background-strong-dark: rgba(36, 36, 36, 1);
   --background-super-dark: rgb(21, 21, 21);
   --background-light: #e6e6e6;
-  --warning: rgb(255, 153, 0);
+  --warning: rgb(255, 213, 0);
   --error: rgb(255, 25, 0);
+  --success: rgb(179, 255, 0);
+  --published: rgb(179, 255, 0);
+  --unpublished: grey;
 }
 
 body {
@@ -104,4 +107,9 @@ h4,
 h5,
 h6 {
   margin: 0;
+}
+
+.lucide {
+  width: 1rem;
+  height: 1rem;
 }

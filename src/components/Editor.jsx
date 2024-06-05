@@ -1,40 +1,68 @@
 import { useState, useContext, useEffect } from "react";
-import { Plus, Trash } from "lucide-react";
-import { useNavigate, useOutletContext } from "react-router-dom";
+import { Plus, X } from "lucide-react";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import "../styles/Create.scss";
-import EditorBlock from "../components/EditorBlock";
+import EditorBlock from "./EditorBlock";
 import { AuthContext } from "../context/AuthContext";
 
 export default function Editor() {
-  const [title, setTitle] = useState(() => {
-    const savedData = sessionStorage.getItem("postEditorData");
-    return savedData ? JSON.parse(savedData).title : "Untitled";
-  });
-
+  const location = useLocation();
+  const currentPath = location.pathname;
+  const storageKey = currentPath;
+  const { id } = useParams();
   const [isEditingInput, setIsEditingInput] = useState(false);
   const [showButtons, setShowButtons] = useState(false);
+
+  const navigate = useNavigate();
+  const { token } = useContext(AuthContext);
+
+  const [title, setTitle] = useState(() => {
+    const savedData = sessionStorage.getItem(storageKey);
+    return savedData ? JSON.parse(savedData).data.title : "Untitled";
+  });
   const [blocks, setBlocks] = useState(() => {
-    const savedData = sessionStorage.getItem("postEditorData");
-    return savedData ? JSON.parse(savedData).blocks : [];
+    const savedData = sessionStorage.getItem(storageKey);
+    return savedData ? JSON.parse(savedData).data.blocks : [];
   });
 
-  const { token } = useContext(AuthContext);
-  const navigate = useNavigate();
-  const [dirty, setDirty] = useOutletContext();
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const response = await fetch(`http://localhost:3000/api/posts/${id}`, {
+          method: "GET",
+          mode: "cors",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch post");
+        }
+
+        const data = await response.json();
+        setTitle(data.title);
+        // setBlocks(data.content);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    currentPath == `/admin/posts/update/${id}` && fetchPost();
+  }, [currentPath]);
 
   useEffect(() => {
-    const savedData = sessionStorage.getItem("postEditorData");
+    const savedData = sessionStorage.getItem(storageKey);
     if (savedData) {
-      const { title, blocks } = JSON.parse(savedData);
+      const { title, blocks } = JSON.parse(savedData).data;
       setTitle(title);
       setBlocks(blocks);
     }
-  }, []);
+  }, [storageKey]);
 
   useEffect(() => {
-    const postEditorData = { title, blocks };
-    sessionStorage.setItem("postEditorData", JSON.stringify(postEditorData));
-  }, [blocks, title]);
+    const postEditorData = { url: currentPath, data: { title, blocks } };
+    sessionStorage.setItem(storageKey, JSON.stringify(postEditorData));
+  }, [blocks, title, storageKey, currentPath]);
 
   const handleTitleClick = () => {
     setIsEditingInput(true);
@@ -78,8 +106,12 @@ export default function Editor() {
       public: e.target.name === "publish",
     };
     console.log(requestBody);
-    setDirty(false);
-    sessionStorage.removeItem("postEditorData");
+    sessionStorage.removeItem(storageKey);
+    navigate("/admin/posts");
+  };
+
+  const handleX = () => {
+    sessionStorage.removeItem(storageKey);
     navigate("/admin/posts");
   };
 
@@ -104,8 +136,8 @@ export default function Editor() {
             ) : (
               <h1 onClick={handleTitleClick}>{title}</h1>
             )}
-            <button type="button" onClick={() => setTitle("")}>
-              <Trash />
+            <button type="button" onClick={handleX}>
+              <X />
             </button>
           </div>
         </div>

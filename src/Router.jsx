@@ -10,7 +10,7 @@ import Posts from "./pages/Posts.jsx";
 import Comments from "./pages/Comments.jsx";
 import Settings from "./pages/Settings.jsx";
 import usePermissions from "./hooks/usePermissions.js";
-import Editor from "./pages/Editor.jsx";
+import Editor from "./components/Editor.jsx";
 
 const ProtectedAdmin = () => {
   const { isAdmin, isLoading } = usePermissions();
@@ -46,6 +46,10 @@ const routes = [
             children: [
               {
                 path: "create",
+                element: <Editor />,
+              },
+              {
+                path: "update/:id",
                 element: <Editor />,
               },
             ],

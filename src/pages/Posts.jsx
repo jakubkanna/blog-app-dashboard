@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
+import { useParams, Link, Outlet } from "react-router-dom";
 import formatTimestamp from "../hooks/formatTimestamp";
 import PostStatus from "../components/PostStatus";
-import "../styles/Posts.scss";
-import { Link, Outlet, useOutletContext } from "react-router-dom";
-import { Edit } from "lucide-react";
 import ButtonDelete from "../components/ButtonDelete";
+import { Edit } from "lucide-react";
+import "../styles/Posts.scss";
 
 export default function Posts() {
   const [posts, setPosts] = useState([]);
-  const [dirty, setDirty] = useOutletContext();
+  const { id } = useParams();
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -22,7 +22,7 @@ export default function Posts() {
         });
 
         if (!response.ok) {
-          return { messege: "Failed to fetch posts" };
+          return { message: "Failed to fetch posts" };
         }
 
         const data = await response.json();
@@ -33,31 +33,76 @@ export default function Posts() {
     };
 
     fetchPosts();
-  }, []); // on mount
+  }, []);
 
-  return (
-    <div className="container">
-      <div className="container-head">
-        <h2>Posts</h2>
-        <button>
-          <Link to={"create"}>Add New</Link>
-        </button>
-      </div>
-      <div className="container-body">
-        <Outlet context={[dirty, setDirty]} />
+  const CreateBody = () => {
+    return (
+      <>
+        <Outlet />
         <ul className="post-list">
           {posts.map((post) => (
             <li key={post._id} className="post-list-item">
               <h2>{post.title}</h2>
               <p>{formatTimestamp(post.timestamp)}</p>
               <PostStatus isPublic={post.public} />
-              <Link to={`/edit/${post._id}`}>
-                <Edit />
-              </Link>
+              <button
+                className={
+                  sessionStorage.getItem("/admin/posts/update/" + post._id)
+                    ? "dirty"
+                    : ""
+                }>
+                <Link to={`update/${post._id}`}>
+                  <Edit />
+                </Link>
+              </button>
               <ButtonDelete props={{ data: post, type: "posts" }} />
             </li>
           ))}
         </ul>
+      </>
+    );
+  };
+
+  const UpdateBody = () => {
+    return (
+      <>
+        <ul className="post-list">
+          {posts.map((post) =>
+            post._id === id ? (
+              <Outlet key={post._id} />
+            ) : (
+              <li key={post._id} className="post-list-item">
+                <h2>{post.title}</h2>
+                <p>{formatTimestamp(post.timestamp)}</p>
+                <PostStatus isPublic={post.public} />
+                <button
+                  className={sessionStorage.getItem(post._id) ? "dirty" : ""}>
+                  <Link to={`update/${post._id}`}>
+                    <Edit />
+                  </Link>
+                </button>
+                <ButtonDelete props={{ data: post, type: "posts" }} />
+              </li>
+            )
+          )}
+        </ul>
+      </>
+    );
+  };
+
+  return (
+    <div className="container">
+      <div className="container-head">
+        <h2>Posts</h2>
+        <button
+          className={
+            sessionStorage.getItem("/admin/posts/create") ? "dirty" : ""
+          }>
+          <Link to={"create"}>Add New</Link>
+        </button>
+      </div>
+      <div className="container-body">
+        {id ? <UpdateBody /> : <CreateBody />}
       </div>
       <div className="container-footer"></div>
     </div>

@@ -1,41 +1,42 @@
 import PropTypes from "prop-types";
 import Sidebar from "./Sidebar";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Message from "./Message";
 
 export default function Main() {
-  //test
-  const [dirty, setDirty] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-
+  const [url, setUrl] = useState("/");
   let location = useLocation();
 
   useEffect(() => {
-    const importantLocation = "/admin/posts/create";
-    const errorText = "Post editor has unsaved changes.";
-
-    if (location.pathname === importantLocation) setDirty(true);
-
-    if (dirty && location.pathname !== importantLocation) {
-      setErrorMessage(errorText);
-      setDirty(false);
+    // Check if the current location is outside "/admin/posts" path
+    if (
+      !location.pathname.startsWith("/admin/posts") ||
+      !location.pathname === "/admin/posts"
+    ) {
+      // Check session storage for items starting with "/admin/posts/"
+      for (let key in sessionStorage) {
+        if (key.startsWith("/admin/posts/")) {
+          setErrorMessage("Posts editor has unsaved changes");
+          setUrl(key);
+          break; // Stop looping once an unsaved change is found
+        }
+      }
+    } else {
+      setErrorMessage("");
     }
-  }, [dirty, location, setDirty]);
+  }, [location]);
 
   return (
     <>
       <main>
         {errorMessage && (
-          <Message
-            message={errorMessage}
-            type={"warning"}
-            url={"posts/create"}
-          />
+          <Message message={errorMessage} type={"warning"} url={url} />
         )}
         <div className="main-content">
           <Sidebar />
-          <Outlet context={[dirty, setDirty]} />{" "}
+          <Outlet />
         </div>
       </main>
     </>

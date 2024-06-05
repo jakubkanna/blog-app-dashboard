@@ -1,14 +1,14 @@
 .post-status {
   max-width: fit-content;
   .published {
-    background-color: rgb(179, 255, 0);
+    background-color: var(--published);
     color: black;
     padding: 5px;
     border-radius: 5px;
   }
 
   .unpublished {
-    background-color: grey;
+    background-color: var(--unpublished);
     color: black;
     padding: 5px;
     border-radius: 5px;
