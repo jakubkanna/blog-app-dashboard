@@ -1,14 +1,16 @@
 import { Editor } from "@tinymce/tinymce-react";
 import { useRef } from "react";
 
-export default function EditorBlockText({ params }) {
-  const { blockContent, setBlockContent, blockIndex } = params;
-
+export default function EditorBlockText({
+  blockIndex,
+  blockContent,
+  updateBlockData,
+}) {
   const editorRef = useRef(null);
-
-  const handleEditorChange = () => {
+  !blockContent && "Initial value";
+  const handleEditorBlur = () => {
     const content = editorRef.current.getContent();
-    setBlockContent(content);
+    updateBlockData({ content });
   };
 
   return (
@@ -48,7 +50,7 @@ export default function EditorBlockText({ params }) {
         content_style:
           "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
       }}
-      onBlur={handleEditorChange}
+      onBlur={handleEditorBlur}
     />
   );
 }
