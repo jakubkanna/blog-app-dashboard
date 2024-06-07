@@ -3,7 +3,7 @@ export const EditorContext = createContext();
 
 export const EditorContextProvider = ({ storageKey, children }) => {
   const stringData = sessionStorage.getItem(storageKey);
-  const data = stringData ? JSON.parse(stringData).data : null;
+  const data = stringData ? JSON.parse(stringData) : null;
 
   const [title, setTitle] = useState(data ? data.title : "Untitled");
   const [blocks, setBlocks] = useState(data ? data.blocks : []);
@@ -12,10 +12,8 @@ export const EditorContextProvider = ({ storageKey, children }) => {
     // Create a default data object if it doesn't exist in sessionStorage
     if (!sessionStorage.getItem(storageKey)) {
       const defaultData = {
-        data: {
-          title: "Untitled",
-          blocks: [],
-        },
+        title: "Untitled",
+        blocks: [],
       };
       sessionStorage.setItem(storageKey, JSON.stringify(defaultData));
     }
@@ -24,15 +22,15 @@ export const EditorContextProvider = ({ storageKey, children }) => {
   useEffect(() => {
     // Update sessionStorage with the new blocks
     const data = JSON.parse(sessionStorage.getItem(storageKey));
-    data.data.blocks = blocks;
+    data.blocks = blocks;
     sessionStorage.setItem(storageKey, JSON.stringify(data));
   }, [blocks, storageKey]);
 
   useEffect(() => {
-    // Save the updated title to session storage under the 'data' parameter
+    // Save the updated title to session storage
     const savedData = sessionStorage.getItem(storageKey);
-    const newData = savedData ? JSON.parse(savedData) : { data: {} };
-    newData.data.title = title;
+    const newData = savedData ? JSON.parse(savedData) : {};
+    newData.title = title;
     sessionStorage.setItem(storageKey, JSON.stringify(newData));
   }, [title, storageKey]);
 

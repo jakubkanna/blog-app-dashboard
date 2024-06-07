@@ -3,12 +3,15 @@ import { useRef } from "react";
 
 export default function EditorBlockText({
   blockIndex,
+  id,
+  type,
   blockContent,
   updateBlockData,
 }) {
   const editorRef = useRef(null);
   !blockContent && "Initial value";
-  const handleEditorBlur = () => {
+
+  const handleEditorData = () => {
     const content = editorRef.current.getContent();
     updateBlockData({ content });
   };
@@ -21,6 +24,7 @@ export default function EditorBlockText({
       onInit={(_evt, editor) => (editorRef.current = editor)}
       initialValue={blockContent}
       init={{
+        selector: "textarea",
         height: 500,
         menubar: false,
         branding: false,
@@ -32,25 +36,22 @@ export default function EditorBlockText({
           "charmap",
           "anchor",
           "searchreplace",
-          "visualblocks",
           "code",
           "fullscreen",
           "insertdatetime",
-          "media",
           "table",
-          "preview",
           "help",
           "wordcount",
+          "code",
         ],
         toolbar:
           "undo redo | blocks | " +
           "bold italic forecolor | alignleft aligncenter " +
           "alignright alignjustify | bullist numlist outdent indent | " +
-          "removeformat | help | image",
-        content_style:
-          "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
+          "removeformat | help | code",
       }}
-      onBlur={handleEditorBlur}
+      onBlur={handleEditorData}
+      onSubmit={handleEditorData}
     />
   );
 }

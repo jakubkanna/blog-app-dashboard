@@ -1,11 +1,39 @@
 import { Link } from "react-router-dom";
 import "../styles/Message.scss";
+import { useContext, useEffect } from "react";
 
-const Message = ({ message, type, url }) => {
+const Message = ({ messageData, hideMessage }) => {
+  if (!messageData) return null; // Return null if messageData is null
+
+  const { data, url } = messageData || {}; // Destructure messageData with default value {}
+
+  const message = data?.message;
+  const response = data?.response;
+
+  useEffect(() => {
+    // Hide the response after 2 seconds if it's ok
+    if (response && response.ok) {
+      const timeout = setTimeout(() => {
+        hideMessage();
+      }, 3000);
+
+      // Clear the timeout if the component unmounts or if a new response is shown
+      return () => clearTimeout(timeout);
+    }
+  }, [hideMessage, messageData, response]);
+
+  const messageType = response?.ok ? "success" : response ? "error" : "warning"; // Determine message type based on response
+
   return (
     message && (
-      <div className={`message ${type}`}>
-        {url ? <Link to={url}>{message}</Link> : { message }}
+      <div className={`message ${messageType}`}>
+        {url ? (
+          <Link to={url} onClick={hideMessage}>
+            {message}
+          </Link>
+        ) : (
+          message
+        )}
       </div>
     )
   );

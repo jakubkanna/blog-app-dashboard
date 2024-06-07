@@ -28,7 +28,7 @@ export default function EditorBlocks() {
       {blocks.map((block, index) => (
         <EditorBlock
           key={block.id}
-          params={{
+          props={{
             index: index,
             totalBlocks: blocks.length,
             blockData: block,

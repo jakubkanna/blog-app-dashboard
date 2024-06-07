@@ -3,7 +3,9 @@ import EditorBlockText from "./EditorBlockText";
 import EditorBlockImage from "./EditorBlockImage";
 import { Delete } from "lucide-react";
 
-const EditorBlock = memo(function EditorBlock({ params }) {
+const EditorBlock = memo(function EditorBlock({ props }) {
+  // memo to re render only on param change
+
   const {
     index,
     totalBlocks,
@@ -11,7 +13,7 @@ const EditorBlock = memo(function EditorBlock({ params }) {
     updateBlockData,
     updateBlockOrder,
     deleteBlock,
-  } = params;
+  } = props;
 
   const Input = () => {
     const [blockIndex, setBlockIndex] = useState(index);
@@ -67,6 +69,8 @@ const EditorBlock = memo(function EditorBlock({ params }) {
       ) : (
         <EditorBlockText
           blockIndex={index}
+          id={blockData.id}
+          type={blockData.type}
           blockContent={blockData.content}
           updateBlockData={updateBlockData}
         />

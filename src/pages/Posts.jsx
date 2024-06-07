@@ -1,44 +1,55 @@
-import { useState, useEffect } from "react";
-import { useParams, Link, Outlet } from "react-router-dom";
+import { useState, useEffect, useCallback, useContext } from "react";
+import { useParams, Link, Outlet, useNavigate } from "react-router-dom";
 import formatTimestamp from "../hooks/formatTimestamp";
 import PostStatus from "../components/PostStatus";
 import ButtonDelete from "../components/ButtonDelete";
 import { Edit } from "lucide-react";
 import "../styles/Posts.scss";
+import { MessageContext } from "../context/MessageContext";
 
 export default function Posts() {
+  const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const { id } = useParams();
+  const { showMessage } = useContext(MessageContext);
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await fetch("http://localhost:3000/api/posts", {
-          method: "GET",
-          mode: "cors",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+  const fetchPosts = useCallback(async () => {
+    try {
+      const response = await fetch("http://localhost:3000/api/posts", {
+        method: "GET",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-        if (!response.ok) {
-          return { message: "Failed to fetch posts" };
-        }
-
-        const data = await response.json();
-        setPosts(data);
-      } catch (error) {
-        console.error("Fetch failed:", error.message);
+      if (!response.ok) {
+        return { message: "Failed to fetch posts" };
       }
-    };
 
-    fetchPosts();
+      const data = await response.json();
+      setPosts(data);
+    } catch (error) {
+      console.error("Fetch failed:", error.message);
+    }
   }, []);
 
+  useEffect(() => {
+    fetchPosts();
+  }, [fetchPosts]);
+
+  //outlet has it's own context to notify Posts component about change
+  const handlePostsChange = async (data, url) => {
+    await fetchPosts();
+    navigate("/admin/posts");
+    showMessage(data, url);
+  };
+
+  //diffrent bodies so editor is rendered in diffrent places dynamically
   const CreateBody = () => {
     return (
       <>
-        <Outlet />
+        <Outlet context={{ onPostsChange: handlePostsChange }} /> {/*editor*/}
         <ul className="post-list">
           {posts.map((post) => (
             <li key={post._id} className="post-list-item">
@@ -55,7 +66,13 @@ export default function Posts() {
                   <Edit />
                 </Link>
               </button>
-              <ButtonDelete props={{ data: post, type: "posts" }} />
+              <ButtonDelete
+                props={{
+                  data: post,
+                  type: "posts",
+                  handleCb: handlePostsChange,
+                }}
+              />
             </li>
           ))}
         </ul>
@@ -69,7 +86,10 @@ export default function Posts() {
         <ul className="post-list">
           {posts.map((post) =>
             post._id === id ? (
-              <Outlet key={post._id} />
+              <Outlet
+                key={post._id}
+                context={{ onPostsChange: handlePostsChange }}
+              /> //editor
             ) : (
               <li key={post._id} className="post-list-item">
                 <h2>{post.title}</h2>
@@ -81,7 +101,13 @@ export default function Posts() {
                     <Edit />
                   </Link>
                 </button>
-                <ButtonDelete props={{ data: post, type: "posts" }} />
+                <ButtonDelete
+                  props={{
+                    data: post,
+                    type: "posts",
+                    handleCb: handlePostsChange,
+                  }}
+                />
               </li>
             )
           )}
