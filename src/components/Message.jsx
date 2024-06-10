@@ -3,9 +3,7 @@ import "../styles/Message.scss";
 import { useContext, useEffect } from "react";
 
 const Message = ({ messageData, hideMessage }) => {
-  if (!messageData) return null; // Return null if messageData is null
-
-  const { data, url } = messageData || {}; // Destructure messageData with default value {}
+  const { data, url } = messageData || {};
 
   const message = data?.message;
   const response = data?.response;

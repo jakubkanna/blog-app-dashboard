@@ -17,7 +17,6 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    console.log("Fetching user.");
     const fetchUser = async () => {
       if (!token) {
         setLoading(false);
@@ -39,7 +38,6 @@ export const AuthProvider = ({ children }) => {
         if (response.ok) {
           const data = await response.json();
           setUser(data);
-          console.log("User:" + data);
         } else {
           console.error(`Fetch failed with status: ${response.status}`);
         }

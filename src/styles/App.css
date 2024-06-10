@@ -43,7 +43,7 @@
 .main-content {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 36px;
+  gap: 60px;
   margin-top: 48px;
 }
 

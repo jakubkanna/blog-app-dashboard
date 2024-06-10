@@ -1,10 +1,14 @@
 import { useContext, useEffect, useState } from "react";
 import { EditorContext } from "../context/EditorContext";
 
-export default function EditorTitle({ storageKey }) {
+export default function EditorTitle() {
   const [isEditingInput, setIsEditingInput] = useState(false);
   const { title, setTitle } = useContext(EditorContext);
-  const [titleState, setTitleState] = useState(title);
+  const [titleState, setTitleState] = useState();
+
+  useEffect(() => {
+    setTitleState(title);
+  }, [title]);
 
   const handleTitleChange = (event) => {
     setTitleState(event.target.value);
@@ -25,7 +29,7 @@ export default function EditorTitle({ storageKey }) {
         <input
           type="text"
           name="title"
-          id="newPostTitle"
+          id="postTitle"
           value={titleState}
           onChange={handleTitleChange}
           onBlur={handleTitleBlur}
