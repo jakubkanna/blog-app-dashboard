@@ -15,7 +15,7 @@ import Events from "./pages/Events.jsx";
 import Works from "./pages/Works.jsx";
 import usePermissions from "./hooks/usePermissions.js";
 import Editor from "./components/Editor.jsx";
-import { EditorContextProvider } from "./context/EditorContext.jsx";
+import { EditorContextProvider } from "./contexts/EditorContext.jsx";
 
 const ProtectedAdmin = () => {
   const { isAdmin, isLoading } = usePermissions();
