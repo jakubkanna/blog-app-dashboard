@@ -5,6 +5,8 @@ interface PaginationProps<T> {
 }
 
 const TablePagination = <T extends {}>({ table }: PaginationProps<T>) => {
+  if (table.options.data.length <= 10) return null;
+
   return (
     <div>
       <button

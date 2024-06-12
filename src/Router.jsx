@@ -2,17 +2,16 @@ import {
   Outlet,
   RouterProvider,
   createBrowserRouter,
-  Navigate,
   useParams,
   useLocation,
 } from "react-router-dom";
 import Login from "./pages/Login.jsx";
 import App from "./App.jsx";
-import Posts from "./pages/Posts.jsx";
-import Comments from "./pages/Comments.jsx";
+import Posts from "./pages/Posts.tsx";
+import Comments from "./pages/Comments.tsx";
 import Settings from "./pages/Settings.jsx";
 import Events from "./pages/Events.tsx";
-import Works from "./pages/Works.jsx";
+import Works from "./pages/Works.tsx";
 import usePermissions from "./hooks/usePermissions.js";
 import Editor from "./components/editor/Editor.jsx";
 import { EditorContextProvider } from "./contexts/EditorContext.jsx";

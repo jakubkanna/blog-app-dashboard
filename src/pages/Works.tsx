@@ -7,26 +7,25 @@ import {
   getPaginationRowModel,
   RowData,
 } from "@tanstack/react-table";
-import { useEvents, Event } from "../hooks/useEvents";
+import { useWorks, Work } from "../hooks/useWorks"; // Assuming you create this hook similar to useEvents
 import Table from "../components/reactTable/Table";
 import Pagination from "../components/reactTable/Pagination";
-import CellDate from "../components/reactTable/CellDate";
 import { useSkipper } from "../hooks/useSkipper.ts";
 import CellDefault from "../components/reactTable/CellDefault.tsx";
 
 declare module "@tanstack/react-table" {
   interface TableMeta<TData extends RowData> {
-    updateEvents: (rowIndex: string, columnId: string, value: unknown) => void;
+    updateWorks: (rowIndex: string, columnId: string, value: unknown) => void;
   }
 }
 
-const defaultColumn: Partial<ColumnDef<Event>> = {
+const defaultColumn: Partial<ColumnDef<Work>> = {
   cell: ({ getValue, row, column: { id }, table }) => {
     const initialValue = getValue();
     const [value, setValue] = React.useState(initialValue);
 
     const onBlur = () => {
-      table.options.meta?.updateEvents(row.original.id, id, value);
+      table.options.meta?.updateWorks(row.original.id, id, value);
     };
 
     React.useEffect(() => {
@@ -43,8 +42,8 @@ const defaultColumn: Partial<ColumnDef<Event>> = {
   },
 };
 
-export default function Events() {
-  const columns = React.useMemo<ColumnDef<Event>[]>(
+export default function Works() {
+  const columns = React.useMemo<ColumnDef<Work>[]>(
     () => [
       {
         header: "Title",
@@ -52,54 +51,23 @@ export default function Events() {
         footer: (props) => props.column.id,
       },
       {
-        header: "Start Date",
-        accessorKey: "start_date",
-        footer: (props) => props.column.id,
-        cell: ({ getValue, row, column: { id }, table }) => (
-          <CellDate
-            value={getValue() as string}
-            onBlur={(value) =>
-              table.options.meta?.updateEvents(row.original.id, id, value)
-            }
-          />
-        ),
-      },
-      {
-        header: "End Date",
-        accessorKey: "end_date",
-        footer: (props) => props.column.id,
-        cell: ({ getValue, row, column: { id }, table }) => (
-          <CellDate
-            value={getValue() as string}
-            onBlur={(value) =>
-              table.options.meta?.updateEvents(row.original.id, id, value)
-            }
-          />
-        ),
-      },
-      {
-        header: "Place",
-        accessorKey: "place",
+        header: "Medium",
+        accessorKey: "medium",
         footer: (props) => props.column.id,
       },
       {
-        header: "Curators",
-        accessorKey: "curators",
+        header: "Year",
+        accessorKey: "year",
         footer: (props) => props.column.id,
       },
       {
-        header: "Tags",
-        accessorKey: "tags",
+        header: "Images",
+        accessorKey: "images",
         footer: (props) => props.column.id,
       },
       {
-        header: "Post",
-        accessorKey: "post",
-        footer: (props) => props.column.id,
-      },
-      {
-        header: "External link",
-        accessorKey: "external_url",
+        header: "Events",
+        accessorKey: "events",
         footer: (props) => props.column.id,
       },
       {
@@ -114,11 +82,11 @@ export default function Events() {
     []
   );
 
-  const { events, loading, error, updateEvent } = useEvents();
+  const { works, loading, error, updateWork } = useWorks();
   const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper();
 
   const table = useReactTable({
-    data: events,
+    data: works,
     columns,
     defaultColumn,
     getCoreRowModel: getCoreRowModel(),
@@ -126,9 +94,9 @@ export default function Events() {
     getPaginationRowModel: getPaginationRowModel(),
     autoResetPageIndex,
     meta: {
-      updateEvents: (rowIndex, columnId, value) => {
+      updateWorks: (rowIndex, columnId, value) => {
         skipAutoResetPageIndex();
-        updateEvent(rowIndex, columnId, value);
+        updateWork(rowIndex, columnId, value);
       },
     },
     debugTable: true,

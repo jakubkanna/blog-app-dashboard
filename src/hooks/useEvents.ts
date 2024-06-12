@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../contexts/AuthContext";
+import { MessageContext } from "../contexts/MessageContext";
 
 export type Event = {
   id: string;
@@ -19,15 +20,16 @@ export const useEvents = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { token } = useContext(AuthContext);
+  const { showMessage } = useContext(MessageContext);
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         const response = await fetch("http://localhost:3000/api/events/");
-        if (!response.ok) {
-          throw new Error("Failed to fetch data");
-        }
         const eventData = await response.json();
+
+        showMessage({ message: eventData.message, response });
+
         const events: Event[] = eventData.map((event: any) => ({
           id: event._id,
           title: event.title,
@@ -43,9 +45,7 @@ export const useEvents = () => {
         }));
         setEvents(events);
       } catch (error) {
-        if (error instanceof Error) {
-          setError(error.message);
-        }
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -76,8 +76,6 @@ export const useEvents = () => {
       );
 
       const responseData = await response.json();
-
-      console.log(responseData);
     } catch (error) {
       console.error(error);
     }
