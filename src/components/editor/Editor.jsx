@@ -1,4 +1,4 @@
-import "../styles/Create.scss";
+import "../../styles/Create.scss";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import EditorTitle from "./EditorTitle";
 import { X } from "lucide-react";
