@@ -11,6 +11,8 @@ import App from "./App.jsx";
 import Posts from "./pages/Posts.jsx";
 import Comments from "./pages/Comments.jsx";
 import Settings from "./pages/Settings.jsx";
+import Events from "./pages/Events.jsx";
+import Works from "./pages/Works.jsx";
 import usePermissions from "./hooks/usePermissions.js";
 import Editor from "./components/Editor.jsx";
 import { EditorContextProvider } from "./context/EditorContext.jsx";
@@ -22,7 +24,7 @@ const ProtectedAdmin = () => {
     return <div>Loading...</div>;
   }
 
-  return isAdmin ? <Outlet /> : <Navigate to={"/"} />;
+  return isAdmin && <Outlet />;
 };
 
 const EditorWithContext = () => {
@@ -39,11 +41,6 @@ const EditorWithContext = () => {
   );
 };
 
-const SettingsRoute = {
-  path: "settings",
-  element: <Settings />,
-};
-
 const routes = [
   {
     path: "/",
@@ -58,29 +55,64 @@ const routes = [
         element: <App />,
         children: [
           {
+            path: "events",
+            element: <Events />,
+            name: "Events",
+          },
+          {
+            path: "works",
+            element: <Works />,
+            name: "Works",
+          },
+          {
             path: "posts",
             element: <Posts />,
+            name: "Posts",
             children: [
               {
                 path: "create",
                 element: <EditorWithContext />,
+                name: "Create Post",
               },
               {
                 path: "update/:id",
                 element: <EditorWithContext />,
+                name: "Update Post",
               },
             ],
           },
           {
             path: "comments",
             element: <Comments />,
+            name: "Comments",
           },
-          SettingsRoute,
+          {
+            path: "settings",
+            element: <Settings />,
+            name: "Settings",
+          },
         ],
       },
     ],
   },
 ];
+
+const extractSidebarRoutes = (routes) => {
+  let sidebarRoutes = [];
+
+  routes.forEach((route) => {
+    if (route.path === "/admin" && route.children) {
+      route.children.forEach((child) => {
+        child.children.forEach((subChild) => {
+          sidebarRoutes.push({ path: subChild.path, name: subChild.name });
+        });
+      });
+    }
+  });
+  return sidebarRoutes;
+};
+
+export const sidebarRoutes = extractSidebarRoutes(routes);
 
 const router = createBrowserRouter(routes);
 

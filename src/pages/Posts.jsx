@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useContext } from "react";
 import { useParams, Link, Outlet, useNavigate } from "react-router-dom";
 import formatTimestamp from "../hooks/formatTimestamp";
-import PostStatus from "../components/PostStatus";
+import Status from "../components/Status";
 import ButtonDelete from "../components/ButtonDelete";
 import { Edit } from "lucide-react";
 import "../styles/Posts.scss";
@@ -22,11 +22,6 @@ export default function Posts() {
           "Content-Type": "application/json",
         },
       });
-
-      if (!response.ok) {
-        return { message: "Failed to fetch posts" };
-      }
-
       const data = await response.json();
       setPosts(data);
     } catch (error) {
@@ -55,7 +50,7 @@ export default function Posts() {
             <li key={post._id} className="post-list-item">
               <h2>{post.title}</h2>
               <p>{formatTimestamp(post.timestamp)}</p>
-              <PostStatus isPublic={post.public} />
+              <Status isPublic={post.public} />
               <button
                 className={
                   sessionStorage.getItem("/admin/posts/update/" + post._id)
@@ -94,7 +89,7 @@ export default function Posts() {
               <li key={post._id} className="post-list-item">
                 <h2>{post.title}</h2>
                 <p>{formatTimestamp(post.timestamp)}</p>
-                <PostStatus isPublic={post.public} />
+                <Status isPublic={post.public} />
                 <button
                   className={sessionStorage.getItem(post._id) ? "dirty" : ""}>
                   <Link to={`update/${post._id}`}>

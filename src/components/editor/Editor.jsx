@@ -1,17 +1,12 @@
 import "../styles/Create.scss";
-import {
-  useLocation,
-  useNavigate,
-  useOutletContext,
-  useParams,
-} from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
 import EditorTitle from "./EditorTitle";
 import { X } from "lucide-react";
 import EditorBlocks from "./EditorBlocks";
 import EditorMenu from "./EditorMenu";
 import { useContext, useEffect } from "react";
-import { AuthContext } from "../context/AuthContext";
-import { EditorContext } from "../context/EditorContext";
+import { AuthContext } from "../../context/AuthContext";
+import { EditorContext } from "../../context/EditorContext";
 
 export default function Editor({ isUpdateUrl, idParam }) {
   const navigate = useNavigate();
@@ -41,7 +36,6 @@ export default function Editor({ isUpdateUrl, idParam }) {
         const data = JSON.parse(fetchedData.data);
 
         if (response.ok) {
-          console.log("set title");
           setTitle(data.title);
           setBlocks(data.blocks);
         }
@@ -51,7 +45,7 @@ export default function Editor({ isUpdateUrl, idParam }) {
     };
     // determine if editor is 'update' or 'create'
     // if update fetch and insert data into form
-    isUpdatePath && fetchPost();
+    isUpdatePath ? fetchPost() : setTitle("Untitled");
   }, [id, isUpdatePath, setBlocks, setTitle]);
 
   const createPost = async (requestBody) => {
@@ -137,18 +131,21 @@ export default function Editor({ isUpdateUrl, idParam }) {
           </div>
         </label>
       </div>
+      <small>Content</small>
       <div className="post-editor-body">
         <EditorBlocks />
         <EditorMenu />
       </div>
+      <small>Summary</small>
       <div className="post-editor-footer">
         <button type="submit" name="save-draft" onClick={handleSubmit}>
-          Unpublic
+          Draft
         </button>
         <button type="submit" name="make-public" onClick={handleSubmit}>
           Public
         </button>
       </div>
+      <hr />
     </form>
   );
 }

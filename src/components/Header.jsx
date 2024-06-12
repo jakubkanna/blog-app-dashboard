@@ -11,9 +11,9 @@ export default function Header() {
       <nav>
         <h1 className="brandname">Admin Dashboard</h1>
         <ul className="menu">
-          <li className="menu-item">
+          {/* <li className="menu-item">
             <ThemeToggleBtn />
-          </li>
+          </li> */}
           {isLoggedIn && (
             <li className="menu-item">
               <Logout />

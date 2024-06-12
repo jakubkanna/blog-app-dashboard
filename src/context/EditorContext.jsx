@@ -2,7 +2,7 @@ import { createContext, useEffect, useState } from "react";
 export const EditorContext = createContext();
 
 export const EditorContextProvider = ({ storageKey, children }) => {
-  const [title, setTitle] = useState("Untitled");
+  const [title, setTitle] = useState();
   const [blocks, setBlocks] = useState([]);
 
   useEffect(() => {

@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import EditorBlock from "./EditorBlock";
-import { EditorContext } from "../context/EditorContext";
+import { EditorContext } from "../../context/EditorContext";
 
 export default function EditorBlocks() {
   const { blocks, setBlocks } = useContext(EditorContext);
@@ -25,19 +25,20 @@ export default function EditorBlocks() {
 
   return (
     <>
-      {blocks.map((block, index) => (
-        <EditorBlock
-          key={block.id}
-          props={{
-            index: index,
-            totalBlocks: blocks.length,
-            blockData: block,
-            updateBlockData: (newData) => updateBlockData(index, newData),
-            updateBlockOrder: (newIndex) => updateBlockOrder(index, newIndex),
-            deleteBlock: deleteBlock,
-          }}
-        />
-      ))}
+      {blocks &&
+        blocks.map((block, index) => (
+          <EditorBlock
+            key={block.id}
+            props={{
+              index: index,
+              totalBlocks: blocks.length,
+              blockData: block,
+              updateBlockData: (newData) => updateBlockData(index, newData),
+              updateBlockOrder: (newIndex) => updateBlockOrder(index, newIndex),
+              deleteBlock: deleteBlock,
+            }}
+          />
+        ))}
     </>
   );
 }

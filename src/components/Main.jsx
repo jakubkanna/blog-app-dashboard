@@ -5,7 +5,7 @@ import { MessageContext } from "../context/MessageContext";
 
 export default function Main() {
   const location = useLocation();
-  const { showMessage, hideMessage } = useContext(MessageContext);
+  const { showMessage } = useContext(MessageContext);
 
   useEffect(() => {
     // Check if the current location is outside "/admin/posts" path
@@ -16,7 +16,7 @@ export default function Main() {
       // Check session storage for items starting with "/admin/posts/"
       for (let key in sessionStorage) {
         if (key.startsWith("/admin/posts/")) {
-          showMessage({ message: "Posts editor has unsaved changes" }, key);
+          showMessage({ message: "Posts Editor has unsaved changes" }, key);
           break; // Stop looping once an unsaved change is found
         }
       }

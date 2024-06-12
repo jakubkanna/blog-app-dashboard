@@ -3,8 +3,6 @@ import { useRef } from "react";
 
 export default function EditorBlockText({
   blockIndex,
-  id,
-  type,
   blockContent,
   updateBlockData,
 }) {
