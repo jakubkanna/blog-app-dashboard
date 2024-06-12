@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { EditorContext } from "../../contexts/EditorContext";
+import { EditorContext } from "../../context/EditorContext";
 
 export default function EditorTitle() {
   const [isEditingInput, setIsEditingInput] = useState(false);

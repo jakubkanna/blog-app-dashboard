@@ -5,7 +5,7 @@ import Status from "../components/Status";
 import ButtonDelete from "../components/ButtonDelete";
 import { Edit } from "lucide-react";
 import "../styles/Posts.scss";
-import { MessageContext } from "../contexts/MessageContext";
+import { MessageContext } from "../context/MessageContext";
 
 export default function Posts() {
   const navigate = useNavigate();

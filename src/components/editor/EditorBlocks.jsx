@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import EditorBlock from "./EditorBlock";
-import { EditorContext } from "../../contexts/EditorContext";
+import { EditorContext } from "../../context/EditorContext";
 
 export default function EditorBlocks() {
   const { blocks, setBlocks } = useContext(EditorContext);

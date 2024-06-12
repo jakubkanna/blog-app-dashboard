@@ -1,5 +1,5 @@
 import { Trash } from "lucide-react";
-import { AuthContext } from "../contexts/AuthContext";
+import { AuthContext } from "../context/AuthContext";
 import { useContext } from "react";
 import PropTypes from "prop-types";
 

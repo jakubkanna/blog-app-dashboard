@@ -1,7 +1,7 @@
 import Sidebar from "./Sidebar";
 import { Outlet, useLocation } from "react-router-dom";
 import { useContext, useEffect } from "react";
-import { MessageContext } from "../contexts/MessageContext";
+import { MessageContext } from "../context/MessageContext";
 
 export default function Main() {
   const location = useLocation();
