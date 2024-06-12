@@ -1,12 +1,12 @@
-import "../styles/Create.scss";
+import "../../styles/Create.scss";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import EditorTitle from "./EditorTitle";
 import { X } from "lucide-react";
 import EditorBlocks from "./EditorBlocks";
 import EditorMenu from "./EditorMenu";
 import { useContext, useEffect } from "react";
-import { AuthContext } from "../../context/AuthContext";
-import { EditorContext } from "../../context/EditorContext";
+import { AuthContext } from "../../contexts/AuthContext";
+import { EditorContext } from "../../contexts/EditorContext";
 
 export default function Editor({ isUpdateUrl, idParam }) {
   const navigate = useNavigate();

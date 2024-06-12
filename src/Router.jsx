@@ -2,7 +2,6 @@ import {
   Outlet,
   RouterProvider,
   createBrowserRouter,
-  Navigate,
   useParams,
   useLocation,
 } from "react-router-dom";
@@ -11,11 +10,11 @@ import App from "./App.jsx";
 import Posts from "./pages/Posts.jsx";
 import Comments from "./pages/Comments.jsx";
 import Settings from "./pages/Settings.jsx";
-import Events from "./pages/Events.jsx";
+import Events from "./pages/Events.tsx";
 import Works from "./pages/Works.jsx";
 import usePermissions from "./hooks/usePermissions.js";
-import Editor from "./components/Editor.jsx";
-import { EditorContextProvider } from "./context/EditorContext.jsx";
+import Editor from "./components/editor/Editor.jsx";
+import { EditorContextProvider } from "./contexts/EditorContext.jsx";
 
 const ProtectedAdmin = () => {
   const { isAdmin, isLoading } = usePermissions();
