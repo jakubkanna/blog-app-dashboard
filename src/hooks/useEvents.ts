@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
+import { AuthContext } from "../contexts/AuthContext";
 
 export type Event = {
   id: string;
@@ -17,8 +18,7 @@ export const useEvents = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
-  let token = "ass";
+  const { token } = useContext(AuthContext);
 
   useEffect(() => {
     const fetchEvents = async () => {
