@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../contexts/AuthContext";
+import { MessageContext } from "../contexts/MessageContext";
 
 export type Post = {
   id: string;
@@ -17,21 +18,16 @@ export const usePosts = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { token } = useContext(AuthContext);
+  const { showMessage } = useContext(MessageContext);
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/posts", {
-          method: "GET",
-          mode: "cors",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        if (!response.ok) {
-          throw new Error("Failed to fetch data");
-        }
+        const response = await fetch("http://localhost:3000/api/posts");
         const postData = await response.json();
+
+        showMessage({ message: postData.message, response });
+
         const posts: Post[] = postData.map((post: any) => ({
           id: post._id,
           author: post.author,
@@ -46,9 +42,7 @@ export const usePosts = () => {
         }));
         setPosts(posts);
       } catch (error) {
-        if (error instanceof Error) {
-          setError(error.message);
-        }
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -59,12 +53,12 @@ export const usePosts = () => {
   const updatePost = async (
     postId: string,
     columnId: string,
-    value: unknown
+    value: string
   ) => {
     const requestBody = {
       [`${columnId}`]: value,
     };
-
+    console.log("reqbody:", requestBody);
     try {
       const response = await fetch(
         `http://localhost:3000/api/posts/update/${postId}`,
@@ -80,11 +74,33 @@ export const usePosts = () => {
 
       const responseData = await response.json();
 
-      console.log(responseData);
+      showMessage({ message: responseData.message, response });
     } catch (error) {
       console.error(error);
     }
   };
 
-  return { posts, loading, error, updatePost };
+  const deletePost = async (postId: string) => {
+    try {
+      const endpoint = `http://localhost:3000/api/posts/delete/${postId}`;
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `${token}`,
+        },
+        body: JSON.stringify({}),
+      });
+      const message = await response.json();
+
+      showMessage({ message: message.message, response: response });
+
+      setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return { posts, loading, error, updatePost, deletePost };
 };

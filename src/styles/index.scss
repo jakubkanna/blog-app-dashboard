@@ -83,6 +83,7 @@ button:focus-visible {
   }
   a {
     color: var(--primary-color);
+    max-width: max-content;
   }
 
   a:hover {

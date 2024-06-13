@@ -2,18 +2,21 @@ import React from "react";
 
 type BooleanCellProps = {
   value: boolean;
-  onBlur: (value: boolean) => void;
+  cb: (value: boolean) => void;
 };
 
-const CellBolean: React.FC<BooleanCellProps> = ({ value, onBlur }) => {
+const CellBolean: React.FC<BooleanCellProps> = ({ value, cb }) => {
   const [checked, setChecked] = React.useState(value);
 
   return (
     <input
       type="checkbox"
       checked={checked}
-      onChange={(e) => setChecked(e.target.checked)}
-      onBlur={() => onBlur(checked)}
+      onChange={(e) => {
+        const newValue = e.target.checked;
+        setChecked(newValue);
+        cb(newValue);
+      }}
     />
   );
 };

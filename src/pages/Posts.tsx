@@ -15,10 +15,13 @@ import CellBolean from "../components/reactTable/CellBolean";
 import CellDate from "../components/reactTable/CellDate";
 import { useSkipper } from "../hooks/useSkipper";
 import CellDefault from "../components/reactTable/CellDefault";
+import ButtonDelete from "../components/ButtonDelete";
+import { Edit } from "lucide-react";
+import { Link } from "react-router-dom";
 
 declare module "@tanstack/react-table" {
   interface TableMeta<TData extends RowData> {
-    updatePosts: (rowIndex: string, columnId: string, value: unknown) => void;
+    updatePosts: (rowId: string, columnId: string, value: unknown) => void;
   }
 }
 
@@ -73,7 +76,7 @@ export default function Posts() {
         cell: ({ getValue, row, column: { id }, table }) => (
           <CellBolean
             value={getValue() as boolean}
-            onBlur={(value) =>
+            cb={(value) =>
               table.options.meta?.updatePosts(row.original.id, id, value)
             }
           />
@@ -81,17 +84,22 @@ export default function Posts() {
       },
       {
         header: "Actions",
-        cell: () => (
-          <>
-            <span>b1</span> <span>b2</span>
-          </>
+        cell: ({ row }) => (
+          <div>
+            <button>
+              <Link to={`update/${row.original.id}`}>
+                <Edit />
+              </Link>
+            </button>
+            <ButtonDelete id={row.original.id} cb={deletePost} />
+          </div>
         ),
       },
     ],
     []
   );
 
-  const { posts, loading, error, updatePost } = usePosts();
+  const { posts, loading, error, updatePost, deletePost } = usePosts();
   const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper();
 
   const table = useReactTable({
@@ -103,9 +111,9 @@ export default function Posts() {
     getPaginationRowModel: getPaginationRowModel(),
     autoResetPageIndex,
     meta: {
-      updatePosts: (rowIndex, columnId, value) => {
+      updatePosts: (rowId, columnId, value) => {
         skipAutoResetPageIndex();
-        updatePost(rowIndex, columnId, value);
+        updatePost(rowId, columnId, value);
       },
     },
     debugTable: true,
@@ -115,9 +123,16 @@ export default function Posts() {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div>
-      <Table table={table} />
-      <Pagination table={table} />
-    </div>
+    <>
+      <div>
+        <Link to={"create"}>
+          <button>Add new</button>
+        </Link>
+      </div>
+      <div>
+        <Table table={table} />
+        <Pagination table={table} />
+      </div>
+    </>
   );
 }

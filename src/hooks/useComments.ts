@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../contexts/AuthContext";
+import { MessageContext } from "../contexts/MessageContext";
 
 export type Comment = {
   author: string; // Change the types as per your model
@@ -14,16 +15,17 @@ export const useComments = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { token } = useContext(AuthContext);
+  const { showMessage } = useContext(MessageContext);
 
   useEffect(() => {
     const fetchComments = async () => {
       try {
         // Fetch comments from your API endpoint
         const response = await fetch("http://localhost:3000/api/comments/");
-        if (!response.ok) {
-          throw new Error("Failed to fetch data");
-        }
         const commentData = await response.json();
+
+        showMessage({ message: commentData.message, response });
+
         console.log(commentData);
         const comments: Comment[] = commentData.map((comment: any) => ({
           author: comment.author.username,
@@ -36,9 +38,7 @@ export const useComments = () => {
         }));
         setComments(comments);
       } catch (error) {
-        if (error instanceof Error) {
-          setError(error.message);
-        }
+        console.error(error);
       } finally {
         setLoading(false);
       }

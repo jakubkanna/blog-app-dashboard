@@ -15,6 +15,7 @@ import Works from "./pages/Works.tsx";
 import usePermissions from "./hooks/usePermissions.js";
 import Editor from "./components/editor/Editor.jsx";
 import { EditorContextProvider } from "./contexts/EditorContext.jsx";
+import PageContainer from "./components/PageContainer.jsx";
 
 const ProtectedAdmin = () => {
   const { isAdmin, isLoading } = usePermissions();
@@ -50,24 +51,22 @@ const routes = [
     element: <ProtectedAdmin />,
     children: [
       {
-        path: "",
         element: <App />,
         children: [
           {
-            path: "events",
-            element: <Events />,
-            name: "Events",
+            element: <PageContainer title="Events" />,
+            children: [{ path: "events", element: <Events />, name: "Events" }],
           },
           {
-            path: "works",
-            element: <Works />,
-            name: "Works",
+            element: <PageContainer title="Works" />,
+            children: [{ path: "works", element: <Works />, name: "Works" }],
           },
           {
             path: "posts",
-            element: <Posts />,
+            element: <PageContainer title="Posts" />,
             name: "Posts",
             children: [
+              { path: "", element: <Posts /> },
               {
                 path: "create",
                 element: <EditorWithContext />,
@@ -81,37 +80,22 @@ const routes = [
             ],
           },
           {
-            path: "comments",
-            element: <Comments />,
-            name: "Comments",
+            element: <PageContainer title="Comments" />,
+            children: [
+              { path: "comments", element: <Comments />, name: "Comments" },
+            ],
           },
           {
-            path: "settings",
-            element: <Settings />,
-            name: "Settings",
+            element: <PageContainer title="Settings" />,
+            children: [
+              { path: "settings", element: <Settings />, name: "Settings" },
+            ],
           },
         ],
       },
     ],
   },
 ];
-
-const extractSidebarRoutes = (routes) => {
-  let sidebarRoutes = [];
-
-  routes.forEach((route) => {
-    if (route.path === "/admin" && route.children) {
-      route.children.forEach((child) => {
-        child.children.forEach((subChild) => {
-          sidebarRoutes.push({ path: subChild.path, name: subChild.name });
-        });
-      });
-    }
-  });
-  return sidebarRoutes;
-};
-
-export const sidebarRoutes = extractSidebarRoutes(routes);
 
 const router = createBrowserRouter(routes);
 

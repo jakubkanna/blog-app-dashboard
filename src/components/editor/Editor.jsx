@@ -1,5 +1,5 @@
 import "../../styles/Create.scss";
-import { useNavigate, useOutletContext } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import EditorTitle from "./EditorTitle";
 import { X } from "lucide-react";
 import EditorBlocks from "./EditorBlocks";
@@ -7,6 +7,7 @@ import EditorMenu from "./EditorMenu";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import { EditorContext } from "../../contexts/EditorContext";
+import { MessageContext } from "../../contexts/MessageContext";
 
 export default function Editor({ isUpdateUrl, idParam }) {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ export default function Editor({ isUpdateUrl, idParam }) {
   const isUpdatePath = isUpdateUrl;
   const { storageKey, setTitle, setBlocks } = useContext(EditorContext);
   const { token } = useContext(AuthContext);
-  const { onPostsChange } = useOutletContext();
+  const { showMessage } = useContext(MessageContext);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -32,11 +33,12 @@ export default function Editor({ isUpdateUrl, idParam }) {
         }
 
         const fetchedData = await response.json();
-
         const data = JSON.parse(fetchedData.data);
 
+        console.log("fetched post:", fetchedData);
+
         if (response.ok) {
-          setTitle(data.title);
+          setTitle(fetchedData.title);
           setBlocks(data.blocks);
         }
       } catch (err) {
@@ -61,12 +63,13 @@ export default function Editor({ isUpdateUrl, idParam }) {
 
       const responseData = await response.json();
 
-      onPostsChange({
+      showMessage({
         message: responseData && responseData.message,
         response: response,
       });
 
       if (response.ok) sessionStorage.removeItem(storageKey);
+      navigate("/admin/posts");
     } catch (error) {
       console.error(error);
     }
@@ -88,12 +91,13 @@ export default function Editor({ isUpdateUrl, idParam }) {
 
       const responseData = await response.json();
 
-      onPostsChange({
+      showMessage({
         message: responseData && responseData.message,
         response: response,
       });
 
       if (response.ok) sessionStorage.removeItem(storageKey);
+      navigate("/admin/posts");
     } catch (error) {
       console.error(error);
     }

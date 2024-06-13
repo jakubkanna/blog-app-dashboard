@@ -74,8 +74,9 @@ export const useEvents = () => {
           body: JSON.stringify(requestBody),
         }
       );
-
       const responseData = await response.json();
+
+      showMessage({ message: responseData.message, response });
     } catch (error) {
       console.error(error);
     }

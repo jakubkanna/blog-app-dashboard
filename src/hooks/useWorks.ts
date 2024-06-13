@@ -22,7 +22,6 @@ export const useWorks = () => {
     const fetchWorks = async () => {
       try {
         const response = await fetch("http://localhost:3000/api/works/");
-
         const workData = await response.json();
 
         showMessage({ message: workData.message, response });
