@@ -8,7 +8,6 @@ import {
 import Login from "./pages/Login.jsx";
 import App from "./App.jsx";
 import Posts from "./pages/Posts.tsx";
-import Comments from "./pages/Comments.tsx";
 import Settings from "./pages/Settings.jsx";
 import Events from "./pages/Events.tsx";
 import Works from "./pages/Works.tsx";
@@ -79,12 +78,7 @@ const routes = [
               },
             ],
           },
-          {
-            element: <PageContainer title="Comments" />,
-            children: [
-              { path: "comments", element: <Comments />, name: "Comments" },
-            ],
-          },
+
           {
             element: <PageContainer title="Settings" />,
             children: [

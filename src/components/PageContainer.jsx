@@ -4,8 +4,13 @@ export default function PageContainer({ title }) {
   return (
     <>
       <div className="container">
-        <h1>{title}</h1>
-        <Outlet />
+        <div className="container-header">
+          <h1>{title}</h1>
+        </div>
+        <div className="container-body">
+          <Outlet />
+        </div>
+        <div className="container-footer"></div>
       </div>
     </>
   );

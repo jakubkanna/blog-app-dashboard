@@ -5,7 +5,7 @@ export default function Sidebar() {
     { path: "/admin/events", name: "Events" },
     { path: "/admin/works", name: "Works" },
     { path: "/admin/posts", name: "Posts" },
-    { path: "/admin/comments", name: "Comments" },
+    // { path: "/admin/comments", name: "Comments" }, //not implemented yet
     { path: "/admin/settings", name: "Settings" },
   ];
   return (
