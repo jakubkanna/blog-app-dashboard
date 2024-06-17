@@ -7,7 +7,6 @@ export const MessageProvider = ({ children }) => {
   const [messageData, setMessageData] = useState(null);
 
   const showMessage = (data, url = null) => {
-    console.log(data);
     setMessageData({ data, url });
   };
 

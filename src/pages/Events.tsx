@@ -1,146 +1,294 @@
-import React from "react";
+import * as React from "react";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/DeleteOutlined";
+import SaveIcon from "@mui/icons-material/Save";
+import CancelIcon from "@mui/icons-material/Close";
 import {
-  ColumnDef,
-  useReactTable,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  RowData,
-} from "@tanstack/react-table";
+  DataGrid,
+  GridColDef,
+  GridActionsCellItem,
+  GridRowId,
+  GridRowModes,
+  GridRowModesModel,
+  GridRowEditStopReasons,
+  GridEventListener,
+  GridSlots,
+  GridRowsProp,
+  GridToolbarContainer,
+  GridRowModel,
+} from "@mui/x-data-grid";
 import { useEvents, Event } from "../hooks/useEvents";
-import Table from "../components/reactTable/Table";
-import Pagination from "../components/reactTable/Pagination";
-import CellDate from "../components/reactTable/CellDate";
-import { useSkipper } from "../hooks/useSkipper.ts";
-import CellDefault from "../components/reactTable/CellDefault.tsx";
+import { randomId } from "@mui/x-data-grid-generator";
+import { Alert, AlertProps, Snackbar } from "@mui/material";
 
-declare module "@tanstack/react-table" {
-  interface TableMeta<TData extends RowData> {
-    updateEvents: (rowIndex: string, columnId: string, value: unknown) => void;
-  }
+interface EditToolbarProps {
+  setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
+  setRowModesModel: (
+    newModel: (oldModel: GridRowModesModel) => GridRowModesModel
+  ) => void;
 }
 
-const defaultColumn: Partial<ColumnDef<Event>> = {
-  cell: ({ getValue, row, column: { id }, table }) => {
-    const initialValue = getValue();
-    const [value, setValue] = React.useState(initialValue);
+function EditToolbar(props: EditToolbarProps) {
+  const { setRows, setRowModesModel } = props;
 
-    const onBlur = () => {
-      table.options.meta?.updateEvents(row.original.id, id, value);
-    };
-
-    React.useEffect(() => {
-      setValue(initialValue);
-    }, [initialValue]);
-
-    return (
-      <CellDefault
-        value={value as string}
-        onChange={(newValue) => setValue(newValue)}
-        onBlur={onBlur}
-      />
-    );
-  },
-};
-
-export default function Events() {
-  const columns = React.useMemo<ColumnDef<Event>[]>(
-    () => [
-      {
-        header: "Title",
-        accessorKey: "title",
-        footer: (props) => props.column.id,
-      },
-      {
-        header: "Start Date",
-        accessorKey: "start_date",
-        footer: (props) => props.column.id,
-        cell: ({ getValue, row, column: { id }, table }) => (
-          <CellDate
-            value={getValue() as string}
-            onBlur={(value) =>
-              table.options.meta?.updateEvents(row.original.id, id, value)
-            }
-          />
-        ),
-      },
-      {
-        header: "End Date",
-        accessorKey: "end_date",
-        footer: (props) => props.column.id,
-        cell: ({ getValue, row, column: { id }, table }) => (
-          <CellDate
-            value={getValue() as string}
-            onBlur={(value) =>
-              table.options.meta?.updateEvents(row.original.id, id, value)
-            }
-          />
-        ),
-      },
-      {
-        header: "Place",
-        accessorKey: "place",
-        footer: (props) => props.column.id,
-      },
-      {
-        header: "Curators",
-        accessorKey: "curators",
-        footer: (props) => props.column.id,
-      },
-      {
-        header: "Tags",
-        accessorKey: "tags",
-        footer: (props) => props.column.id,
-      },
-      {
-        header: "Post",
-        accessorKey: "post",
-        footer: (props) => props.column.id,
-      },
-      {
-        header: "External link",
-        accessorKey: "external_url",
-        footer: (props) => props.column.id,
-      },
-      {
-        header: "Actions",
-        cell: () => (
-          <>
-            <span>b1</span> <span>b2</span>
-          </>
-        ),
-      },
-    ],
-    []
-  );
-
-  const { events, loading, error, updateEvent } = useEvents();
-  const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper();
-
-  const table = useReactTable({
-    data: events,
-    columns,
-    defaultColumn,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    autoResetPageIndex,
-    meta: {
-      updateEvents: (rowIndex, columnId, value) => {
-        skipAutoResetPageIndex();
-        updateEvent(rowIndex, columnId, value);
-      },
-    },
-    debugTable: true,
-  });
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error}</div>;
+  const handleClick = () => {
+    const id = randomId();
+    setRows((oldRows) => [...oldRows, { id, name: "", age: "", isNew: true }]);
+    setRowModesModel((oldModel) => ({
+      ...oldModel,
+      [id]: { mode: GridRowModes.Edit, fieldToFocus: "name" },
+    }));
+  };
 
   return (
-    <div>
-      <Table table={table} />
-      <Pagination table={table} />
-    </div>
+    <GridToolbarContainer>
+      <Button color="primary" startIcon={<AddIcon />} onClick={handleClick}>
+        Add new
+      </Button>
+    </GridToolbarContainer>
+  );
+}
+
+export default function FullFeaturedCrudGrid() {
+  const { events, updateEvent, createEvent, deleteEvent } = useEvents();
+  const [rows, setRows] = React.useState<GridRowsProp>([]);
+  const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
+    {}
+  );
+  const [snackbar, setSnackbar] = React.useState<Pick<
+    AlertProps,
+    "children" | "severity"
+  > | null>(null);
+
+  React.useMemo(() => {
+    setRows(events);
+  }, [events]);
+
+  const handleRowEditStop: GridEventListener<"rowEditStop"> = (
+    params,
+    event
+  ) => {
+    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
+      event.defaultMuiPrevented = true;
+    }
+  };
+
+  const handleEditClick = (id: GridRowId) => () => {
+    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
+  };
+
+  const handleSaveClick = (id: GridRowId) => () => {
+    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
+  };
+
+  const handleDeleteClick = (id: GridRowId) => () => {
+    const result = window.confirm(
+      `Are you sure you want to delete item: ID:${id} permanently?`
+    );
+    if (result) {
+      setRows(rows.filter((row) => row.id !== id));
+      deleteEvent(id);
+      setSnackbar({
+        children: "Event successfully deleted",
+        severity: "success",
+      });
+    }
+  };
+
+  const handleCancelClick = (id: GridRowId) => () => {
+    setRowModesModel({
+      ...rowModesModel,
+      [id]: { mode: GridRowModes.View, ignoreModifications: true },
+    });
+
+    const editedRow = rows.find((row) => row.id === id);
+    if (editedRow!.isNew) {
+      setRows(rows.filter((row) => row.id !== id));
+    }
+  };
+
+  const handleCloseSnackbar = () => setSnackbar(null);
+
+  const handleProcessRowUpdate = async (newRow: GridRowModel) => {
+    if (newRow.isNew) {
+      try {
+        const createdEvent = await createEvent(newRow as Event);
+
+        setSnackbar({
+          children: "Event list successfully created",
+          severity: "success",
+        });
+
+        setRows((rows) =>
+          rows.map((row) => (row.id === newRow.id ? createdEvent : row))
+        );
+
+        return createdEvent;
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+    } else {
+      try {
+        const updatedEvent = await updateEvent(newRow as Event);
+
+        setSnackbar({
+          children: "Event successfully updated",
+          severity: "success",
+        });
+        const updatedRow = { ...newRow, isNew: false };
+
+        console.log(updatedEvent);
+        setRows((rows) =>
+          rows.map((row) => (row.id === updatedEvent.id ? updatedRow : row))
+        );
+        return updatedRow;
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+    }
+  };
+
+  const handleProcessRowUpdateError = React.useCallback((error: Error) => {
+    setSnackbar({ children: error.message, severity: "error" });
+  }, []);
+
+  const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
+    setRowModesModel(newRowModesModel);
+  };
+
+  const columns: GridColDef[] = [
+    {
+      field: "title",
+      headerName: "Title",
+      width: 180,
+      flex: 1,
+      editable: true,
+    },
+    {
+      field: "description",
+      flex: 1,
+
+      headerName: "Description",
+      editable: true,
+    },
+    {
+      field: "start_date",
+      flex: 1,
+      headerName: "Start Date",
+      type: "date",
+      editable: true,
+    },
+    {
+      field: "end_date",
+      flex: 1,
+      headerName: "End Date",
+      type: "date",
+      editable: true,
+    },
+    { field: "venue", headerName: "Venue", flex: 1, editable: true },
+    { field: "address", headerName: "Address", flex: 1, editable: true },
+    { field: "curators", headerName: "Curators", flex: 1, editable: true },
+    { field: "tags", headerName: "Tags", flex: 1, editable: true },
+    {
+      field: "external_url",
+      headerName: "External URL",
+      flex: 1,
+
+      editable: true,
+      renderCell: (params) => (
+        <a
+          href={params.value as string}
+          target="_blank"
+          rel="noopener noreferrer">
+          {params.value}
+        </a>
+      ),
+    },
+    {
+      field: "post",
+      headerName: "Post",
+      flex: 1,
+
+      editable: true,
+      renderCell: (params) => (
+        <a
+          href={params.value as string}
+          target="_blank"
+          rel="noopener noreferrer">
+          {params.value}
+        </a>
+      ),
+    },
+    { field: "public", headerName: "Public", flex: 1, editable: true },
+
+    {
+      field: "actions",
+      type: "actions",
+      headerName: "Actions",
+      flex: 1,
+
+      getActions: ({ id }) => {
+        const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
+
+        if (isInEditMode) {
+          return [
+            <GridActionsCellItem
+              icon={<SaveIcon />}
+              label="Save"
+              onClick={handleSaveClick(id)}
+            />,
+            <GridActionsCellItem
+              icon={<CancelIcon />}
+              label="Cancel"
+              onClick={handleCancelClick(id)}
+            />,
+          ];
+        }
+
+        return [
+          <GridActionsCellItem
+            icon={<EditIcon />}
+            label="Edit"
+            onClick={handleEditClick(id)}
+          />,
+          <GridActionsCellItem
+            icon={<DeleteIcon />}
+            label="Delete"
+            onClick={handleDeleteClick(id)}
+          />,
+        ];
+      },
+    },
+  ];
+
+  return (
+    <Box sx={{ height: "600px", width: "100%" }}>
+      <DataGrid
+        rows={rows}
+        columns={columns}
+        editMode="row"
+        rowModesModel={rowModesModel}
+        onRowModesModelChange={handleRowModesModelChange}
+        onRowEditStop={handleRowEditStop}
+        processRowUpdate={handleProcessRowUpdate}
+        onProcessRowUpdateError={handleProcessRowUpdateError}
+        slots={{ toolbar: EditToolbar as GridSlots["toolbar"] }}
+        slotProps={{ toolbar: { setRows, setRowModesModel } }}
+      />
+      {!!snackbar && (
+        <Snackbar
+          open
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          onClose={handleCloseSnackbar}
+          autoHideDuration={6000}>
+          <Alert {...snackbar} onClose={handleCloseSnackbar} />
+        </Snackbar>
+      )}
+    </Box>
   );
 }
