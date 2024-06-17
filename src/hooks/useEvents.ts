@@ -30,8 +30,8 @@ export const useEvents = () => {
         const events: Event[] = eventData.map((event: any) => ({
           id: event._id,
           title: event.title,
-          start_date: new Date(event.start_date),
-          end_date: event.end_date ? new Date(event.end_date) : undefined,
+          start_date: event.start_date,
+          end_date: event.end_date,
           place: event.place,
           curators: event.curators,
           tags: event.tags,
@@ -106,10 +106,6 @@ export const useEvents = () => {
 
       const eventWithId: Event = {
         ...createdEvent.newEvent,
-        start_date: new Date(createdEvent.start_date),
-        end_date: createdEvent.end_date
-          ? new Date(createdEvent.end_date)
-          : undefined,
         id: createdEvent.newEvent._id,
       };
       return eventWithId;
@@ -141,5 +137,11 @@ export const useEvents = () => {
       throw error;
     }
   };
-  return { events, loading, updateEvent, createEvent, deleteEvent };
+  return {
+    data: events,
+    updateData: updateEvent,
+    createData: createEvent,
+    deleteData: deleteEvent,
+    loading,
+  };
 };

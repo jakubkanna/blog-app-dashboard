@@ -20,9 +20,9 @@ import {
   GridToolbarContainer,
   GridRowModel,
 } from "@mui/x-data-grid";
-import { useEvents, Event } from "../hooks/useEvents";
 import { randomId } from "@mui/x-data-grid-generator";
 import { Alert, AlertProps, Snackbar } from "@mui/material";
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface EditToolbarProps {
   setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
@@ -33,14 +33,20 @@ interface EditToolbarProps {
 
 function EditToolbar(props: EditToolbarProps) {
   const { setRows, setRowModesModel } = props;
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const handleClick = () => {
-    const id = randomId();
-    setRows((oldRows) => [{ id, name: "", age: "", isNew: true }, ...oldRows]);
-    setRowModesModel((oldModel) => ({
-      [id]: { mode: GridRowModes.Edit, fieldToFocus: "name" },
-      ...oldModel,
-    }));
+    if (location.pathname === "/admin/posts") {
+      navigate(`create`);
+    } else {
+      const id = randomId();
+      setRows((oldRows) => [{ id, isNew: true }, ...oldRows]);
+      setRowModesModel((oldModel) => ({
+        [id]: { mode: GridRowModes.Edit, fieldToFocus: "title" },
+        ...oldModel,
+      }));
+    }
   };
 
   return (
@@ -52,8 +58,19 @@ function EditToolbar(props: EditToolbarProps) {
   );
 }
 
-export default function FullFeaturedCrudGrid() {
-  const { events, updateEvent, createEvent, deleteEvent } = useEvents();
+interface CRUDTableProps {
+  columns: GridColDef[];
+  useDataHook: () => {
+    data: any[];
+    loading: Boolean;
+    updateData: (data: any) => Promise<any>;
+    createData: (data: any) => Promise<any>;
+    deleteData: (id: GridRowId) => Promise<void>;
+  };
+}
+
+export default function CRUDTable({ columns, useDataHook }: CRUDTableProps) {
+  const { data, updateData, createData, deleteData, loading } = useDataHook();
   const [rows, setRows] = React.useState<GridRowsProp>([]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
@@ -62,10 +79,12 @@ export default function FullFeaturedCrudGrid() {
     AlertProps,
     "children" | "severity"
   > | null>(null);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   React.useMemo(() => {
-    setRows(events);
-  }, [events]);
+    data && setRows(data);
+  }, [data]);
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
@@ -77,7 +96,11 @@ export default function FullFeaturedCrudGrid() {
   };
 
   const handleEditClick = (id: GridRowId) => () => {
-    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
+    if (location.pathname === "/admin/posts") {
+      navigate(`update/${id}`);
+    } else {
+      setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
+    }
   };
 
   const handleSaveClick = (id: GridRowId) => () => {
@@ -90,9 +113,9 @@ export default function FullFeaturedCrudGrid() {
     );
     if (result) {
       setRows(rows.filter((row) => row.id !== id));
-      deleteEvent(id);
+      deleteData(id);
       setSnackbar({
-        children: "Event successfully deleted",
+        children: "Item successfully deleted",
         severity: "success",
       });
     }
@@ -115,35 +138,34 @@ export default function FullFeaturedCrudGrid() {
   const handleProcessRowUpdate = async (newRow: GridRowModel) => {
     if (newRow.isNew) {
       try {
-        const createdEvent = await createEvent(newRow as Event);
+        const createdItem = await createData(newRow);
 
         setSnackbar({
-          children: "Event list successfully created",
+          children: "Item successfully created",
           severity: "success",
         });
 
         setRows((rows) =>
-          rows.map((row) => (row.id === newRow.id ? createdEvent : row))
+          rows.map((row) => (row.id === newRow.id ? createdItem : row))
         );
 
-        return createdEvent;
+        return createdItem;
       } catch (error) {
         console.error(error);
         throw error;
       }
     } else {
       try {
-        const updatedEvent = await updateEvent(newRow as Event);
+        const updatedItem = await updateData(newRow);
 
         setSnackbar({
-          children: "Event successfully updated",
+          children: "Item successfully updated",
           severity: "success",
         });
         const updatedRow = { ...newRow, isNew: false };
 
-        console.log(updatedEvent);
         setRows((rows) =>
-          rows.map((row) => (row.id === updatedEvent.id ? updatedRow : row))
+          rows.map((row) => (row.id === updatedItem.id ? updatedRow : row))
         );
         return updatedRow;
       } catch (error) {
@@ -161,77 +183,13 @@ export default function FullFeaturedCrudGrid() {
     setRowModesModel(newRowModesModel);
   };
 
-  const columns: GridColDef[] = [
-    {
-      field: "title",
-      headerName: "Title",
-      width: 180,
-      flex: 1,
-      editable: true,
-    },
-    {
-      field: "description",
-      flex: 1,
-
-      headerName: "Description",
-      editable: true,
-    },
-    {
-      field: "start_date",
-      flex: 1,
-      headerName: "Start Date",
-      type: "date",
-      editable: true,
-    },
-    {
-      field: "end_date",
-      flex: 1,
-      headerName: "End Date",
-      type: "date",
-      editable: true,
-    },
-    { field: "venue", headerName: "Venue", flex: 1, editable: true },
-    { field: "address", headerName: "Address", flex: 1, editable: true },
-    { field: "curators", headerName: "Curators", flex: 1, editable: true },
-    { field: "tags", headerName: "Tags", flex: 1, editable: true },
-    {
-      field: "external_url",
-      headerName: "External URL",
-      flex: 1,
-
-      editable: true,
-      renderCell: (params) => (
-        <a
-          href={params.value as string}
-          target="_blank"
-          rel="noopener noreferrer">
-          {params.value}
-        </a>
-      ),
-    },
-    {
-      field: "post",
-      headerName: "Post URL",
-      flex: 1,
-
-      editable: true,
-      renderCell: (params) => (
-        <a
-          href={params.value as string}
-          target="_blank"
-          rel="noopener noreferrer">
-          {params.value}
-        </a>
-      ),
-    },
-    { field: "public", headerName: "Public", flex: 1, editable: true },
-
+  const combinedColumns: GridColDef[] = [
+    ...columns,
     {
       field: "actions",
       type: "actions",
       headerName: "Actions",
       flex: 1,
-
       getActions: ({ id }) => {
         const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
 
@@ -264,13 +222,13 @@ export default function FullFeaturedCrudGrid() {
         ];
       },
     },
-  ];
+  ].filter(Boolean) as GridColDef[];
 
   return (
     <Box sx={{ height: "600px", width: "100%" }}>
       <DataGrid
         rows={rows}
-        columns={columns}
+        columns={combinedColumns}
         editMode="row"
         rowModesModel={rowModesModel}
         onRowModesModelChange={handleRowModesModelChange}

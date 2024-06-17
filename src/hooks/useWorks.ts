@@ -1,9 +1,9 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../contexts/AuthContext";
-import { MessageContext } from "../contexts/MessageContext";
 
 export type Work = {
   id: string;
+  _id: string;
   title: string;
   medium: string[];
   year: number;
@@ -14,17 +14,13 @@ export type Work = {
 export const useWorks = () => {
   const [works, setWorks] = useState<Work[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const { token } = useContext(AuthContext);
-  const { showMessage } = useContext(MessageContext);
 
   useEffect(() => {
     const fetchWorks = async () => {
       try {
         const response = await fetch("http://localhost:3000/api/works/");
         const workData = await response.json();
-
-        showMessage({ message: workData.message, response });
 
         const works: Work[] = workData.map((work: any) => ({
           id: work._id,
@@ -45,14 +41,9 @@ export const useWorks = () => {
     fetchWorks();
   }, []);
 
-  const updateWork = async (
-    workId: string,
-    columnId: string,
-    value: unknown
-  ) => {
-    const requestBody = {
-      [`${columnId}`]: value,
-    };
+  const updateWork = async (newRow: Work): Promise<Work> => {
+    const requestBody = { ...newRow };
+    const workId = requestBody.id;
 
     try {
       const response = await fetch(
@@ -67,13 +58,78 @@ export const useWorks = () => {
         }
       );
 
-      const responseData = await response.json();
+      if (!response.ok) {
+        throw new Error("Failed to update work");
+      }
 
-      showMessage({ message: responseData.message, response });
+      const updatedWork: Work = await response.json();
+
+      return { ...updatedWork, id: updatedWork._id };
     } catch (error) {
       console.error(error);
+      throw error;
     }
   };
 
-  return { works, loading, error, updateWork };
+  const createWork = async (newRow: Work): Promise<Work> => {
+    const requestBody = { ...newRow };
+    try {
+      const response = await fetch("http://localhost:3000/api/works/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `${token}`,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create work");
+      }
+
+      const createdWork: any = await response.json();
+
+      const workWithId: Work = {
+        ...createdWork,
+        id: createdWork._id,
+      };
+
+      return workWithId;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+
+  const deleteWork = async (workId: number) => {
+    try {
+      const endpoint = `http://localhost:3000/api/works/delete/${workId}`;
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `${token}`,
+        },
+        body: JSON.stringify({}),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to delete work");
+      }
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+
+  return {
+    data: works,
+    updateData: updateWork,
+    createData: createWork,
+    deleteData: deleteWork,
+    loading,
+  };
 };

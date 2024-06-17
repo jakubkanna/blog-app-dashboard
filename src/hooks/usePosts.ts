@@ -1,64 +1,40 @@
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../contexts/AuthContext";
-import { MessageContext } from "../contexts/MessageContext";
-
-export type Post = {
-  id: string;
-  author: string;
-  timestamp: string;
-  title: string;
-  data: string;
-  public: boolean;
-  slug: string;
-  modified?: string;
-};
 
 export const usePosts = () => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const { token } = useContext(AuthContext);
-  const { showMessage } = useContext(MessageContext);
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await fetch("http://localhost:3000/api/posts");
+        const response = await fetch("http://localhost:3000/api/posts/");
         const postData = await response.json();
 
-        showMessage({ message: postData.message, response });
-
-        const posts: Post[] = postData.map((post: any) => ({
+        const fetchedPosts: Post[] = postData.map((post: any) => ({
           id: post._id,
-          author: post.author,
-          timestamp: new Date(post.timestamp).toISOString().substring(0, 10),
+          _id: post._id,
           title: post.title,
-          data: post.data,
+          timestamp: new Date(post.timestamp),
           public: post.public,
-          slug: post.slug,
-          modified: post.modified
-            ? new Date(post.modified).toISOString().substring(0, 10)
-            : undefined,
         }));
-        setPosts(posts);
+
+        setPosts(fetchedPosts);
       } catch (error) {
         console.error(error);
       } finally {
         setLoading(false);
       }
     };
+
     fetchPosts();
   }, []);
 
-  const updatePost = async (
-    postId: string,
-    columnId: string,
-    value: string
-  ) => {
-    const requestBody = {
-      [`${columnId}`]: value,
-    };
-    console.log("reqbody:", requestBody);
+  const updatePost = async (newPost: Post): Promise<Post> => {
+    const requestBody = { ...newPost };
+    const postId = requestBody.id;
+
     try {
       const response = await fetch(
         `http://localhost:3000/api/posts/update/${postId}`,
@@ -72,11 +48,48 @@ export const usePosts = () => {
         }
       );
 
-      const responseData = await response.json();
+      if (!response.ok) {
+        throw new Error("Failed to update post");
+      }
 
-      showMessage({ message: responseData.message, response });
+      const updatedPost: Post = await response.json();
+
+      return { ...updatedPost, id: updatedPost._id };
     } catch (error) {
       console.error(error);
+      throw error;
+    }
+  };
+
+  const createPost = async (newPost: Post): Promise<Post> => {
+    const requestBody = { ...newPost };
+    try {
+      const response = await fetch("http://localhost:3000/api/posts/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `${token}`,
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create post");
+      }
+
+      const createdPost: any = await response.json();
+
+      const postWithId: Post = {
+        ...createdPost,
+        id: createdPost._id,
+        timestamp: new Date(createdPost.timestamp),
+      };
+
+      return postWithId;
+    } catch (error) {
+      console.error(error);
+      throw error;
     }
   };
 
@@ -92,15 +105,22 @@ export const usePosts = () => {
         },
         body: JSON.stringify({}),
       });
-      const message = await response.json();
 
-      showMessage({ message: message.message, response: response });
-
-      setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to delete post");
+      }
     } catch (error) {
       console.error(error);
+      throw error;
     }
   };
 
-  return { posts, loading, error, updatePost, deletePost };
+  return {
+    data: posts,
+    updateData: updatePost,
+    createData: createPost,
+    deleteData: deletePost,
+    loading,
+  };
 };
