@@ -29,6 +29,7 @@ export const useWorks = () => {
           year: work.year,
           images: work.images,
           events: work.events,
+          public: work.public,
         }));
 
         setWorks(works);

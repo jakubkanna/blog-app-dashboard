@@ -3,17 +3,14 @@ import { AuthContext } from "../contexts/AuthContext";
 
 const usePermissions = () => {
   const { user } = useContext(AuthContext);
+
   if (!user) return false;
 
   const isAdmin = user && user.role === "admin";
 
-  const isAuthor = (commentData) => {
-    return user && user._id === commentData.author._id;
-  };
-
   const isLoggedIn = !!user;
 
-  return { isLoggedIn, isAdmin, isAuthor };
+  return { isLoggedIn, isAdmin };
 };
 
 export default usePermissions;

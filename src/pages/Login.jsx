@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import LoginForm from "../components/FormLogin";
 import Logout from "../components/Logout";
 import usePermissions from "../hooks/usePermissions";
@@ -14,9 +14,7 @@ export default function Login() {
   useEffect(() => {
     if (isLoggedIn) {
       if (isAdmin) {
-        navigate("/admin");
-      } else {
-        navigate("/user");
+        navigate("/admin/dashboard");
       }
     }
   }, [isLoggedIn, isAdmin, navigate]);
@@ -25,13 +23,21 @@ export default function Login() {
     <>
       {isLoggedIn ? (
         <>
-          <p>You are already logged in.</p>
+          <p>You are logged in.</p>
           <Logout />
         </>
       ) : (
         <>
           <Header />
-          <LoginForm />
+          <div className="container">
+            <div className="container-header">
+              <h1>Login</h1>
+            </div>
+            <div className="container-body">
+              <LoginForm />
+            </div>
+            <div className="container-footer"></div>
+          </div>
           <Footer />
         </>
       )}

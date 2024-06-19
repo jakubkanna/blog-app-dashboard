@@ -8,7 +8,7 @@ import Router from "./Router.jsx";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <AuthProvider>
     <React.StrictMode>
-      <ThemeProvider defaultTheme="dark" storageKey="theme">
+      <ThemeProvider defaultTheme="light" storageKey="theme">
         <Router />
       </ThemeProvider>
     </React.StrictMode>

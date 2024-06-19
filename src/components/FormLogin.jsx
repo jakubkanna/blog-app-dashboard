@@ -1,23 +1,29 @@
 import { useState, useContext } from "react";
 import { AuthContext } from "../contexts/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 
 const LoginForm = () => {
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
-  const { setToken } = useContext(AuthContext);
-  const navigate = useNavigate();
+  const { setToken, setUser } = useContext(AuthContext);
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const handleSuccessLogin = (data) => {
     setToken(data.token);
-    localStorage.setItem("token", data.token);
-    navigate(-1);
+    setUser(data.user);
   };
-  const handleFailedLogin = (error) => {
-    console.error("Authentication failed:", error);
+
+  const handleFailedLogin = (message) => {
     setToken(null);
-    localStorage.removeItem("token");
+    setUser(null);
+    setSnackbarMessage(message || "Login failed");
+    setSnackbarOpen(true);
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -37,17 +43,25 @@ const LoginForm = () => {
 
       const data = await response.json();
 
-      handleSuccessLogin(data);
+      if (response.ok) {
+        handleSuccessLogin(data);
+      } else {
+        handleFailedLogin(data.message);
+      }
     } catch (error) {
-      handleFailedLogin(error);
+      handleFailedLogin(error.message);
     }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
   };
 
   return (
     <div>
       <form onSubmit={handleSubmit}>
         <input
-          type="username"
+          type="text"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           placeholder="Username"
@@ -60,9 +74,20 @@ const LoginForm = () => {
         />
         <button type="submit">Login</button>
         <p>
-          Don't have an account? <Link to="/register">Register</Link>
+          <Link to="/">Reset password</Link>
         </p>
       </form>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}>
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity="error"
+          sx={{ width: "100%" }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

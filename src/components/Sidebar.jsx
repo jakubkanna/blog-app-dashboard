@@ -2,12 +2,14 @@ import { Link } from "react-router-dom";
 
 export default function Sidebar() {
   const sidebarRoutes = [
+    { path: "/admin/dashboard", name: "Dashboard" },
     { path: "/admin/events", name: "Events" },
     { path: "/admin/works", name: "Works" },
     { path: "/admin/posts", name: "Posts" },
-    // { path: "/admin/comments", name: "Comments" }, //not implemented yet
+    { path: "", name: "Images" },
     { path: "/admin/settings", name: "Settings" },
   ];
+
   return (
     <aside>
       <ul className="side-menu">

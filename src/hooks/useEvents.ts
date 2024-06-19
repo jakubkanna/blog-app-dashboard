@@ -5,15 +5,15 @@ export type Event = {
   id: string;
   _id: string;
   title: string;
+  subtitle?: string;
   start_date: Date;
   end_date?: Date;
-  place?: string;
-  curators: string[];
+  venue?: string;
   tags: string[];
+  images: string[];
   post?: string;
   external_url: string;
-  subRows?: Event[];
-  public: Boolean;
+  public: boolean;
 };
 
 export const useEvents = () => {
@@ -29,15 +29,17 @@ export const useEvents = () => {
 
         const events: Event[] = eventData.map((event: any) => ({
           id: event._id,
+          _id: event._id,
           title: event.title,
+          subtitle: event.subtitle,
           start_date: event.start_date,
           end_date: event.end_date,
-          place: event.place,
-          curators: event.curators,
+          venue: event.venue,
           tags: event.tags,
+          images: event.images,
           post: event.post,
           external_url: event.external_url,
-          public: event.public || true,
+          public: event.public,
         }));
         setEvents(events);
       } catch (error) {
@@ -51,7 +53,11 @@ export const useEvents = () => {
   }, []);
 
   const updateEvent = async (newRow: Event): Promise<Event> => {
-    const requestBody = { ...newRow };
+    const requestBody = {
+      ...newRow,
+      post: newRow.post === "" ? null : newRow.post,
+    };
+    console.log(requestBody);
     const eventId = requestBody.id;
 
     try {
@@ -68,7 +74,8 @@ export const useEvents = () => {
       );
 
       if (!response.ok) {
-        throw new Error("Failed to update event");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update event");
       }
 
       const updatedEvent: Event = await response.json();
@@ -86,7 +93,11 @@ export const useEvents = () => {
   };
 
   const createEvent = async (newRow: Event): Promise<Event> => {
-    const requestBody = { ...newRow };
+    const requestBody = {
+      ...newRow,
+      post: newRow.post === "" ? null : newRow.post,
+    };
+
     try {
       const response = await fetch("http://localhost:3000/api/events/create", {
         method: "POST",
@@ -115,7 +126,7 @@ export const useEvents = () => {
     }
   };
 
-  const deleteEvent = async (eventId: number) => {
+  const deleteEvent = async (eventId: string) => {
     try {
       const endpoint = `http://localhost:3000/api/events/delete/${eventId}`;
 
@@ -137,6 +148,7 @@ export const useEvents = () => {
       throw error;
     }
   };
+
   return {
     data: events,
     updateData: updateEvent,

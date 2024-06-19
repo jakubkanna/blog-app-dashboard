@@ -9,8 +9,9 @@ import Login from "./pages/Login.jsx";
 import App from "./App.jsx";
 import Posts from "./pages/Posts.jsx";
 import Settings from "./pages/Settings.jsx";
-import Events from "./pages/Events.jsx";
+import Events from "./pages/Events.tsx";
 import Works from "./pages/Works.jsx";
+import Dashboard from "./pages/Dashboard.jsx";
 import usePermissions from "./hooks/usePermissions.js";
 import Editor from "./components/editor/Editor.jsx";
 import { EditorContextProvider } from "./contexts/EditorContext.jsx";
@@ -18,12 +19,8 @@ import PageContainer from "./components/PageContainer.jsx";
 
 const ProtectedAdmin = () => {
   const { isAdmin, isLoading } = usePermissions();
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  return isAdmin && <Outlet />;
+  isLoading && <div>Loading...</div>;
+  return isAdmin ? <Outlet /> : <Login />;
 };
 
 const EditorWithContext = () => {
@@ -52,6 +49,12 @@ const routes = [
       {
         element: <App />,
         children: [
+          {
+            element: <PageContainer title="Dashboard" />,
+            children: [
+              { path: "dashboard", element: <Dashboard />, name: "Dashboard" },
+            ],
+          },
           {
             element: <PageContainer title="Events" />,
             children: [{ path: "events", element: <Events />, name: "Events" }],
