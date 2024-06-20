@@ -1,6 +1,5 @@
 import { useWorks } from "../hooks/useWorks";
 import CRUDTable from "../components/CRUDTable";
-import { useEvents } from "../hooks/useEvents";
 
 function Works() {
   const { data: events } = useEvents();

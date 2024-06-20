@@ -1,22 +1,17 @@
 import { useState } from "react";
-import { useEvents } from "../hooks/useEvents";
 import CRUDTable from "../components/CRUDTable";
 import { usePosts } from "../hooks/usePosts";
-import {
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-} from "@mui/material";
-import { Editor } from "@tinymce/tinymce-react";
+import { Button } from "@mui/material";
+import EditorModal from "../components/editor/EditorModal.jsx";
+import { useEventsContext } from "../contexts/EventsContext"; // Import context hook
 
-function Events() {
+export default function Events() {
   const { data: posts } = usePosts();
-  const [errorMessage, setErrorMessage] = useState("");
-  const [openEditor, setOpenEditor] = useState(false);
-  const [editingField, setEditingField] = useState("");
-  const [editedValue, setEditedValue] = useState("");
+  const { updateData } = useEventsContext();
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [params, setParams] = useState(null);
+  const [initVal, setInitVal] = useState("");
 
   const postOptions = [
     { title: "-", id: "" },
@@ -26,32 +21,48 @@ function Events() {
     })),
   ];
 
-  const handleOpenEditor = (field, value) => {
-    setEditingField(field);
-    setEditedValue(value);
-    setOpenEditor(true);
+  const openModal = (params) => {
+    setParams(params);
+    setInitVal(params.value);
+    setModalOpen(true);
   };
 
-  const handleCloseEditor = () => {
-    setOpenEditor(false);
+  const handleModalClose = () => {
+    setModalOpen(false);
   };
 
-  const handleEditorChange = (content, editor) => {
-    setEditedValue(content);
+  const handleEditorSubmit = async (newContent) => {
+    const newRow = { ...params.row };
+    newRow[params.field] = newContent;
+    await updateData(newRow);
   };
 
-  const handleSaveChanges = () => {
-    handleCloseEditor();
+  const modalCell = (params) => {
+    return (
+      <Button
+        variant="contained"
+        size="small"
+        onClick={() => openModal(params)}>
+        Edit
+      </Button>
+    );
   };
 
   const eventColumns = [
     { field: "title", headerName: "Title", flex: 1, editable: true },
-    { field: "subtitle", headerName: "Subtitle", flex: 1, editable: true },
+    {
+      field: "subtitle",
+      headerName: "Subtitle",
+      flex: 1,
+      editable: false,
+      renderCell: (params) => modalCell(params),
+    },
     {
       field: "description",
       headerName: "Description",
       flex: 1,
-      editable: true,
+      editable: false,
+      renderCell: (params) => modalCell(params),
     },
     {
       field: "start_date",
@@ -61,8 +72,8 @@ function Events() {
       editable: true,
       valueFormatter: (value) => {
         if (!value) return "N/A";
-        const isoDate = new Date(value); // Convert ISO string to Date object
-        const formattedDate = isoDate.toLocaleDateString(); // Format as JS date format
+        const isoDate = new Date(value);
+        const formattedDate = isoDate.toLocaleDateString();
         return formattedDate;
       },
     },
@@ -74,14 +85,14 @@ function Events() {
       editable: true,
       valueFormatter: (value) => {
         if (!value) return "N/A";
-        const isoDate = new Date(value); // Convert ISO string to Date object
-        const formattedDate = isoDate.toLocaleDateString(); // Format as JS date format
+        const isoDate = new Date(value);
+        const formattedDate = isoDate.toLocaleDateString();
         return formattedDate;
       },
       preProcessEditCellProps: (params) => {
         const startDateValue = params.row.start_date;
         const startDate = new Date(startDateValue);
-        const endDate = new Date(params.props.value as string);
+        const endDate = new Date(params.props.value);
 
         const hasError = isNaN(startDate.getTime()) || endDate < startDate;
 
@@ -157,7 +168,6 @@ function Events() {
       getOptionLabel: (value) => value.title,
       valueGetter: (value) => {
         if (!value) {
-          // If no value is selected, return the first option
           return postOptions.length > 0 ? postOptions[0].id : "";
         }
         return value;
@@ -177,46 +187,16 @@ function Events() {
       {errorMessage && (
         <div style={{ color: "red", marginBottom: "10px" }}>{errorMessage}</div>
       )}
-      <CRUDTable columns={eventColumns} useDataHook={useEvents} />
+      <CRUDTable columns={eventColumns} context={useEventsContext} />
 
-      <Dialog
-        open={openEditor}
-        onClose={handleCloseEditor}
-        fullWidth
-        maxWidth="md">
-        <DialogTitle>Edit {editingField}</DialogTitle>
-        <DialogContent>
-          <Editor
-            apiKey="YOUR_API_KEY"
-            initialValue={editedValue}
-            init={{
-              height: 500,
-              menubar: true,
-              plugins: [
-                "advlist autolink lists link image charmap print preview anchor",
-                "searchreplace visualblocks code fullscreen",
-                "insertdatetime media table paste code help wordcount",
-              ],
-              toolbar:
-                "undo redo | formatselect | bold italic backcolor | \
-                alignleft aligncenter alignright alignjustify | \
-                bullist numlist outdent indent | removeformat | help",
-            }}
-            onEditorChange={handleEditorChange}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseEditor}>Cancel</Button>
-          <Button
-            onClick={handleSaveChanges}
-            variant="contained"
-            color="primary">
-            Save Changes
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <EditorModal
+        key={params?.id}
+        title={params?.field}
+        open={modalOpen}
+        handleClose={handleModalClose}
+        initialValue={initVal}
+        onSubmit={handleEditorSubmit}
+      />
     </div>
   );
 }
-
-export default Events;

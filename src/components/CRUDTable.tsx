@@ -60,7 +60,7 @@ function EditToolbar(props: EditToolbarProps) {
 
 interface CRUDTableProps {
   columns: GridColDef[];
-  useDataHook: () => {
+  context: () => {
     data: any[];
     loading: Boolean;
     updateData: (data: any) => Promise<any>;
@@ -69,8 +69,8 @@ interface CRUDTableProps {
   };
 }
 
-export default function CRUDTable({ columns, useDataHook }: CRUDTableProps) {
-  const { data, updateData, createData, deleteData, loading } = useDataHook();
+export default function CRUDTable({ columns, context }: CRUDTableProps) {
+  const { data, updateData, createData, deleteData, loading } = context();
   const [rows, setRows] = React.useState<GridRowsProp>([]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
@@ -156,7 +156,8 @@ export default function CRUDTable({ columns, useDataHook }: CRUDTableProps) {
       }
     } else {
       try {
-        const updatedItem = await updateData(newRow);
+        // const updatedItem =
+        await updateData(newRow);
 
         setSnackbar({
           children: "Item successfully updated",
@@ -164,9 +165,9 @@ export default function CRUDTable({ columns, useDataHook }: CRUDTableProps) {
         });
         const updatedRow = { ...newRow, isNew: false };
 
-        setRows((rows) =>
-          rows.map((row) => (row.id === updatedItem.id ? updatedRow : row))
-        );
+        // setRows((rows) =>
+        //   rows.map((row) => (row.id === updatedItem.id ? updatedRow : row))
+        // );
         return updatedRow;
       } catch (error) {
         console.error(error);
