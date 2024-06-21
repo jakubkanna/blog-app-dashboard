@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import PropTypes from "prop-types";
 import { Modal, Box, Button } from "@mui/material";
 import { Editor } from "@tinymce/tinymce-react";
@@ -72,6 +72,7 @@ const EditorModal = ({ open, handleClose, title, initialValue, onSubmit }) => {
 };
 
 EditorModal.propTypes = {
+  title: PropTypes.string,
   open: PropTypes.bool.isRequired,
   handleClose: PropTypes.func.isRequired,
   initialValue: PropTypes.string.isRequired,

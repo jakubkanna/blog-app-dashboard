@@ -17,6 +17,7 @@ import Editor from "./components/editor/Editor.jsx";
 import { EditorContextProvider } from "./contexts/EditorContext.jsx";
 import PageContainer from "./components/PageContainer.jsx";
 import { EventsProvider } from "./contexts/EventsContext.tsx";
+import Images from "./pages/Images.jsx";
 
 const ProtectedAdmin = () => {
   const { isAdmin, isLoading } = usePermissions();
@@ -55,6 +56,10 @@ const routes = [
             children: [
               { path: "dashboard", element: <Dashboard />, name: "Dashboard" },
             ],
+          },
+          {
+            element: <PageContainer title="Images" />,
+            children: [{ path: "images", element: <Images />, name: "Images" }],
           },
           {
             element: <PageContainer title="Events" />,
