@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import DropZone from "../components/DropZone";
 import { Alert, AlertTitle, CircularProgress } from "@mui/material";
+import { AuthContext } from "../contexts/AuthContext";
 
 const ImageUpload = ({ config }) => {
   const [files, setFiles] = useState([]);
@@ -9,8 +10,42 @@ const ImageUpload = ({ config }) => {
     severity: "",
   });
   const [uploading, setUploading] = useState(false); // State to track uploading status
+  const { token } = useContext(AuthContext);
+
+  async function MockResolveNotOk() {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          ok: false, // Change this to true to simulate a successful response
+          status: 400, // You can set any HTTP status code
+          json: async () => ({
+            error: { message: "Mocked error message" },
+          }),
+        });
+      }, 2000);
+    });
+  }
+
+  async function MockResolveOk() {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          ok: true, // Change this to true to simulate a successful response
+          status: 200, // You can set any HTTP status code
+          json: async () => ({
+            message: "Mocked message",
+          }),
+        });
+      }, 2000);
+    });
+  }
 
   const uploadToCloudinary = async (file) => {
+    setMessage({
+      msg: `Uploading ${file.name} to Cloudinary...`,
+      severity: "info",
+    });
+
     const data = new FormData();
     data.append("file", file);
     data.append("api_key", config.apiKey);
@@ -18,7 +53,7 @@ const ImageUpload = ({ config }) => {
     data.append("tags", config.presetName);
 
     const response = await fetch(
-      "https://api.cloudinary.com/v1_1/dzsehmvrr/image/upload",
+      `https://api.cloudinary.com/v1_1/${config.cloudName}/image/upload`,
       {
         method: "POST",
         body: data,
@@ -31,59 +66,66 @@ const ImageUpload = ({ config }) => {
     }
 
     const result = await response.json();
-    return result.secure_url; // Return the URL of the uploaded image
+    return result.secure_url;
   };
 
-  const uploadToDatabase = async (fileUrl) => {
-    // Simulating a mock upload to the database
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve(); // Simulate a successful upload
-      }, 1000); // Simulate delay of 1 second
-    });
-  };
-
-  const uploadImages = async () => {
-    setUploading(true); // Set uploading status to true
+  const uploadToServer = async (file, fileUrl) => {
     setMessage({
-      msg: "Uploading image...",
+      msg: `Uploading ${file.name} to the server...`,
       severity: "info",
     });
 
-    for (const file of files) {
-      try {
-        let fileUrl = URL.createObjectURL(file); // Default to local URL for database upload
+    const data = {
+      fileUrl,
+    };
 
-        if (config.cld) {
-          // If Cloudinary config exists, upload to Cloudinary first
-          setMessage({
-            msg: "Uploading image to Cloudinary...",
-            severity: "info",
-          });
+    const response = await fetch(`http://localhost:3000/api/images/create`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const result = await response.json();
+      throw new Error(result.error.message);
+    }
+  };
+
+  const uploadImages = async () => {
+    setUploading(true);
+    let allUploadsSuccessful = true;
+
+    for (let file of files) {
+      try {
+        let fileUrl = URL.createObjectURL(file);
+        console.log(fileUrl); // blob
+
+        if (config?.useCld) {
           fileUrl = await uploadToCloudinary(file);
         }
 
-        setMessage({
-          msg: "Uploading image to database...",
-          severity: "info",
-        });
-
-        // Upload the file URL to your database (mocked )
-        await uploadToDatabase(fileUrl);
-
-        setMessage({
-          msg: "Upload successful.",
-          severity: "success",
-        });
-        setFiles([]);
+        await uploadToServer(file, fileUrl);
       } catch (error) {
         setMessage({
           msg: `Error during upload: ${error.message}`,
           severity: "error",
         });
+        allUploadsSuccessful = false;
+        break;
       }
     }
 
+    if (allUploadsSuccessful) {
+      setMessage({
+        msg: "All files uploaded successfully.",
+        severity: "success",
+      });
+    }
+
+    setFiles([]);
     setUploading(false);
   };
 

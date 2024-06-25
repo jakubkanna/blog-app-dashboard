@@ -4,10 +4,14 @@ import ImageUpload from "../components/ImageUpload";
 import Library from "../components/Library";
 
 export default function Images() {
+  const cloudName = "dzsehmvrr";
+
   const config = {
+    useCld: false, //should use cld?
     apiKey: "291738647398191",
     presetName: "guflpyvn",
-    cld: new Cloudinary({ cloud: { cloudName: "dzsehmvrr" } }), //Cloudinary instance
+    cloudName: cloudName,
+    cld: new Cloudinary({ cloud: { cloudName: cloudName } }), //Cloudinary instance
   };
 
   return (

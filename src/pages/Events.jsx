@@ -8,7 +8,6 @@ import { useEventsContext } from "../contexts/EventsContext"; // Import context 
 export default function Events() {
   const { data: posts } = usePosts();
   const { updateData } = useEventsContext();
-  const [errorMessage, setErrorMessage] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [params, setParams] = useState(null);
   const [initVal, setInitVal] = useState("");
@@ -89,24 +88,6 @@ export default function Events() {
         const formattedDate = isoDate.toLocaleDateString();
         return formattedDate;
       },
-      preProcessEditCellProps: (params) => {
-        const startDateValue = params.row.start_date;
-        const startDate = new Date(startDateValue);
-        const endDate = new Date(params.props.value);
-
-        const hasError = isNaN(startDate.getTime()) || endDate < startDate;
-
-        if (hasError) {
-          setErrorMessage("End date must be after start date.");
-        } else {
-          setErrorMessage("");
-        }
-
-        return {
-          ...params.props,
-          error: hasError,
-        };
-      },
     },
     { field: "venue", headerName: "Venue", flex: 1, editable: true },
     {
@@ -184,9 +165,6 @@ export default function Events() {
 
   return (
     <div>
-      {errorMessage && (
-        <div style={{ color: "red", marginBottom: "10px" }}>{errorMessage}</div>
-      )}
       <CRUDTable columns={eventColumns} context={useEventsContext} />
 
       <EditorModal

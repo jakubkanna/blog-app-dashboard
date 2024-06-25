@@ -226,7 +226,7 @@ export default function CRUDTable({ columns, context }: CRUDTableProps) {
   ].filter(Boolean) as GridColDef[];
 
   return (
-    <Box sx={{ height: "600px", width: "100%" }}>
+    <>
       <DataGrid
         rows={rows}
         columns={combinedColumns}
@@ -248,6 +248,6 @@ export default function CRUDTable({ columns, context }: CRUDTableProps) {
           <Alert {...snackbar} onClose={handleCloseSnackbar} />
         </Snackbar>
       )}
-    </Box>
+    </>
   );
 }

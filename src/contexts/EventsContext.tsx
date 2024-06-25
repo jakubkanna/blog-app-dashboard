@@ -129,8 +129,8 @@ export const EventsProvider: React.FC = ({ children }) => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to create event");
+        const result = await response.json();
+        throw new Error(result.error.message || "Failed to create event");
       }
 
       const createdEvent: any = await response.json();
