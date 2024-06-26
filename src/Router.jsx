@@ -5,19 +5,19 @@ import {
   useParams,
   useLocation,
 } from "react-router-dom";
-import Login from "./pages/Login.jsx";
-import App from "./App.jsx";
-import Posts from "./pages/Posts.jsx";
-import Settings from "./pages/Settings.jsx";
-import Events from "./pages/Events.jsx";
-import Works from "./pages/Works.jsx";
-import Dashboard from "./pages/Dashboard.jsx";
-import usePermissions from "./hooks/usePermissions.js";
-import Editor from "./components/editor/Editor.jsx";
-import { EditorContextProvider } from "./contexts/EditorContext.jsx";
-import PageContainer from "./components/PageContainer.jsx";
-import { EventsProvider } from "./contexts/EventsContext.tsx";
-import Images from "./pages/Images.jsx";
+import Login from "./pages/Login";
+import App from "./App";
+import Posts from "./pages/Posts";
+import Settings from "./pages/Settings";
+import Events from "./pages/Events";
+import Works from "./pages/Works";
+import Dashboard from "./pages/Dashboard";
+import usePermissions from "./hooks/usePermissions";
+import Editor from "./components/editor/Editor";
+import { EditorContextProvider } from "./contexts/EditorContext";
+import PageContainer from "./components/PageContainer";
+import { EventsProvider } from "./contexts/EventsContext";
+import Images from "./pages/Images";
 
 const ProtectedAdmin = () => {
   const { isAdmin, isLoading } = usePermissions();

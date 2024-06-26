@@ -1,5 +1,4 @@
 import CRUDTable from "../components/CRUDTable";
-import { usePosts } from "../hooks/usePosts";
 
 function Posts() {
   const postColumns = [
@@ -22,7 +21,7 @@ function Posts() {
       type: "boolean",
     },
   ];
-  return <CRUDTable columns={postColumns} useDataHook={usePosts} />;
+  return <CRUDTable columns={postColumns} />;
 }
 
 export default Posts;

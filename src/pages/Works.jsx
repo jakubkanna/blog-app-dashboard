@@ -1,8 +1,7 @@
-import { useWorks } from "../hooks/useWorks";
 import CRUDTable from "../components/CRUDTable";
 
 function Works() {
-  const { data: events } = useEvents();
+  const { data: events } = [];
 
   const eventOptions = [
     { value: "", label: "-" },
@@ -41,7 +40,7 @@ function Works() {
     },
   ];
 
-  return <CRUDTable columns={workColumns} useDataHook={useWorks} />;
+  return <CRUDTable columns={workColumns} />;
 }
 
 export default Works;

@@ -1,12 +1,11 @@
 import { useState } from "react";
 import CRUDTable from "../components/CRUDTable";
-import { usePosts } from "../hooks/usePosts";
 import { Button } from "@mui/material";
 import EditorModal from "../components/editor/EditorModal.jsx";
 import { useEventsContext } from "../contexts/EventsContext"; // Import context hook
 
 export default function Events() {
-  const { data: posts } = usePosts();
+  const { data: posts } = [];
   const { updateData } = useEventsContext();
   const [modalOpen, setModalOpen] = useState(false);
   const [params, setParams] = useState(null);

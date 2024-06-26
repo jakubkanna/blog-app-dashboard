@@ -7,7 +7,7 @@ export default function Images() {
   const cloudName = "dzsehmvrr";
 
   const config = {
-    useCld: false, //should use cld?
+    useCld: true, //should use cld?
     apiKey: "291738647398191",
     presetName: "guflpyvn",
     cloudName: cloudName,

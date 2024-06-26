@@ -1,9 +1,9 @@
 import "./styles/index.scss";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { ThemeProvider } from "./contexts/ThemeContext.jsx";
-import { AuthProvider } from "./contexts/AuthContext.jsx";
-import Router from "./Router.jsx";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import { AuthProvider } from "./contexts/AuthContext";
+import Router from "./Router";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <AuthProvider>
