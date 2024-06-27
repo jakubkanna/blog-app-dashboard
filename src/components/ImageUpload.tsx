@@ -2,18 +2,7 @@ import { useContext, useState } from "react";
 import DropZone from "./DropZone";
 import { Alert, AlertTitle, CircularProgress } from "@mui/material";
 import { AuthContext } from "../contexts/AuthContext";
-
-function getFileNameWithoutExtension(fileName: string): string {
-  const index = fileName.lastIndexOf(".");
-  return index === -1 ? fileName : fileName.substring(0, index);
-}
-
-interface Config {
-  apiKey: string;
-  presetName: string;
-  cloudName: string;
-  useCld: boolean;
-}
+import { config } from "../../config";
 
 interface ImageInstance {
   url: string;
@@ -27,11 +16,12 @@ interface ImageInstance {
   filename?: string;
   alt?: string;
   tags?: string[];
+  dimensions?: { width: {}; height: {} };
 }
 
 type Severity = "error" | "warning" | "info" | "success";
 
-const ImageUpload = ({ config }: { config: Config }) => {
+const ImageUpload = () => {
   const [files, setFiles] = useState<File[]>([]);
   const [message, setMessage] = useState<{
     msg: string;
@@ -43,34 +33,6 @@ const ImageUpload = ({ config }: { config: Config }) => {
   const [uploading, setUploading] = useState(false); // State to track uploading status
   const { token } = useContext(AuthContext);
 
-  //can be removed later
-
-  //async function MockResolveNotOk() {
-  //   return new Promise<Response>((resolve) => {
-  //     setTimeout(() => {
-  //       resolve({
-  //         ok: false,
-  //         status: 400,
-  //         json: async () => ({ error: { message: "Mocked error message" } }),
-  //       } as Response);
-  //     }, 2000);
-  //   });
-  // }
-
-  // async function MockResolveOk() {
-  //   return new Promise<Response>((resolve) => {
-  //     setTimeout(() => {
-  //       resolve({
-  //         ok: true,
-  //         status: 200,
-  //         json: async () => ({
-  //           message: "Mocked message",
-  //         }),
-  //       } as Response);
-  //     }, 2000);
-  //   });
-  // }
-
   const uploadToCloudinary = async (file: File) => {
     setMessage({
       msg: `Uploading ${file.name} to Cloudinary...`,
@@ -79,12 +41,12 @@ const ImageUpload = ({ config }: { config: Config }) => {
 
     const data = new FormData();
     data.append("file", file);
-    data.append("api_key", config.apiKey);
-    data.append("upload_preset", config.presetName);
-    data.append("tags", config.presetName);
+    data.append("api_key", config.CLD_API_KEY);
+    data.append("upload_preset", config.CLD_PRESET_NAME);
+    data.append("tags", config.CLD_PRESET_NAME);
 
     const response = await fetch(
-      `https://api.cloudinary.com/v1_1/${config.cloudName}/image/upload`,
+      `https://api.cloudinary.com/v1_1/${config.CLD_CLOUD_NAME}/image/upload`,
       {
         method: "POST",
         body: data,
@@ -129,12 +91,13 @@ const ImageUpload = ({ config }: { config: Config }) => {
     //upload file to the server
     const uploadResult = await uploadFile();
     setMessage({ msg: uploadResult.message, severity: "info" });
-    console.log("uploadResult", uploadResult);
+    console.log(uploadResult);
+    instance.original_path = file.name;
     instance.url = uploadResult.url;
     instance.secure_url = uploadResult.secure_url;
-    instance.original_path ||= file.name;
-    instance.bytes ||= file.size;
-    instance.public_id ||= getFileNameWithoutExtension(file.name);
+    instance.bytes = file.size;
+    instance.dimensions = uploadResult.dimensions;
+    instance.filename = uploadResult.filename;
 
     const createImageInstance = async () => {
       setMessage({
@@ -171,14 +134,21 @@ const ImageUpload = ({ config }: { config: Config }) => {
 
     for (let file of files) {
       try {
-        let imgInstance: ImageInstance | undefined;
+        let imgInstance: ImageInstance = {
+          url: "",
+          original_path: "",
+          bytes: 0,
+          public_id: "",
+          dimensions: { width: 0, height: 0 },
+        };
 
-        if (config?.useCld) {
+        if (config.USE_CLD) {
           const cldData = await uploadToCloudinary(file);
           console.log("cldData", cldData);
           imgInstance = {
             original_path: file.name,
             url: "",
+            dimensions: { width: cldData.width, height: cldData.height },
             public_id: cldData.public_id,
             cld_url: cldData.url,
             cld_secure_url: cldData.secure_url,
@@ -189,9 +159,7 @@ const ImageUpload = ({ config }: { config: Config }) => {
           };
         }
 
-        if (imgInstance) {
-          await uploadToServer(file, imgInstance);
-        }
+        await uploadToServer(file, imgInstance);
       } catch (error: any) {
         setMessage({
           msg: `Error during upload: ${error.message}`,
@@ -223,7 +191,7 @@ const ImageUpload = ({ config }: { config: Config }) => {
         </Alert>
       )}
       {files.length > 0 && (
-        <button onClick={uploadImages} disabled={uploading}>
+        <Button onClick={uploadImages} disabled={uploading}>
           {uploading ? (
             <>
               <CircularProgress size={24} /> Uploading...
@@ -231,7 +199,7 @@ const ImageUpload = ({ config }: { config: Config }) => {
           ) : (
             "Upload"
           )}
-        </button>
+        </Button>
       )}
     </>
   );

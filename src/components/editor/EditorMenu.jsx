@@ -22,20 +22,20 @@ export default function EditorMenu() {
 
   return (
     <div className="new-block-menu">
-      <button
+      <Button
         className="new-block-btn"
-        type="button"
+        type="Button"
         onClick={handleNewBlockBtn}>
         <small>Add new block</small> <Plus />
-      </button>
+      </Button>
       {showButtons && (
         <div className="new-block-blocks-btns">
-          <button type="button" onClick={() => addBlock("text")}>
+          <Button type="Button" onClick={() => addBlock("text")}>
             Text
-          </button>
-          <button type="button" onClick={() => addBlock("image")}>
+          </Button>
+          <Button type="Button" onClick={() => addBlock("image")}>
             Image
-          </button>
+          </Button>
         </div>
       )}
     </div>

@@ -3,6 +3,7 @@ import { AuthContext } from "../contexts/AuthContext";
 import { Link } from "react-router-dom";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+import { Button } from "@mui/material";
 
 const LoginForm = () => {
   const [password, setPassword] = useState("");
@@ -72,7 +73,7 @@ const LoginForm = () => {
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
         />
-        <button type="submit">Login</button>
+        <Button type="submit">Login</Button>
         <p>
           <Link to="/">Reset password</Link>
         </p>

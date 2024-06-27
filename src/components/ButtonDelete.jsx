@@ -15,8 +15,8 @@ export default function ButtonDelete({ id, cb }) {
   };
 
   return (
-    <button type="button" onClick={confirmDelete}>
+    <Button type="Button" onClick={confirmDelete}>
       <Trash />
-    </button>
+    </Button>
   );
 }

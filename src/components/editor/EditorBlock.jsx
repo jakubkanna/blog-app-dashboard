@@ -52,9 +52,9 @@ const EditorBlock = memo(function EditorBlock({ props }) {
             <small onClick={() => setIsEditing(true)}>
               {`Block ${index}: ${blockData.type}`}
             </small>
-            <button>
+            <Button>
               <Delete onClick={handleDelete} />
-            </button>
+            </Button>
           </div>
         )}
       </>

@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { AuthContext } from "../contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@mui/material";
 
 export default function Logout() {
   const { setToken, setUser } = useContext(AuthContext);
@@ -26,5 +27,5 @@ export default function Logout() {
     }
   };
 
-  return <Link onClick={handleLogout}>Logout</Link>;
+  return <Button onClick={handleLogout}>Logout</Button>;
 }

@@ -129,9 +129,9 @@ export default function Editor({ isUpdateUrl, idParam }) {
           <small>Title</small>
           <div className="post-editor-header-content">
             <EditorTitle />
-            <button type="button" onClick={handleDelete}>
+            <Button type="Button" onClick={handleDelete}>
               <X />
-            </button>
+            </Button>
           </div>
         </label>
       </div>
@@ -142,12 +142,12 @@ export default function Editor({ isUpdateUrl, idParam }) {
       </div>
       <small>Summary</small>
       <div className="post-editor-footer">
-        <button type="submit" name="save-draft" onClick={handleSubmit}>
+        <Button type="submit" name="save-draft" onClick={handleSubmit}>
           Draft
-        </button>
-        <button type="submit" name="make-public" onClick={handleSubmit}>
+        </Button>
+        <Button type="submit" name="make-public" onClick={handleSubmit}>
           Public
-        </button>
+        </Button>
       </div>
       <hr />
     </form>

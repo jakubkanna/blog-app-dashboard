@@ -5,8 +5,8 @@ export function ThemeToggleBtn() {
   const { theme, setTheme } = useTheme();
 
   return (
-    <button onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
+    <Button onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
       {theme === "light" ? <Moon /> : <Sun />}
-    </button>
+    </Button>
   );
 }
