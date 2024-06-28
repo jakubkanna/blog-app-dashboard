@@ -5,7 +5,7 @@ import { AuthContext } from "../contexts/AuthContext";
 import { config } from "../../config";
 import { ImageInstance, Severity } from "../../types";
 
-const ImageUpload = () => {
+const ImageUpload = ({ imageList, setImageList }) => {
   const [files, setFiles] = useState<File[]>([]);
   const [message, setMessage] = useState<{
     msg: string;
@@ -29,7 +29,6 @@ const ImageUpload = () => {
     data.append("api_key", config.CLD_API_KEY);
     data.append("upload_preset", config.CLD_PRESET_NAME);
     data.append("tags", config.CLD_PRESET_NAME);
-
     const response = await fetch(
       `${config.CLD_API_URL}${config.CLD_CLOUD_NAME}/image/upload`,
       {
@@ -76,7 +75,6 @@ const ImageUpload = () => {
     // upload file to the server
     const uploadResult = await uploadFile();
     setMessage({ msg: uploadResult.message, severity: "info" });
-    console.log(uploadResult);
     instance.original_path = file.name;
     instance.url = uploadResult.url;
     instance.secure_url = uploadResult.secure_url;
@@ -105,6 +103,17 @@ const ImageUpload = () => {
         throw new Error(result.error.message);
       }
       setMessage({ msg: result.message, severity: "info" });
+      setImageList((prevList) => {
+        const updatedList = prevList.map((item) => {
+          if (item.public_id === result.imageinstance.public_id) {
+            // Replace the existing item with the updated one
+            return result.imageinstance;
+          }
+          return item; // For other items, return unchanged
+        });
+
+        return updatedList;
+      });
 
       return;
     };
@@ -127,9 +136,8 @@ const ImageUpload = () => {
           dimensions: { width: 0, height: 0 },
         };
 
-        if (config.USE_CLD) {
+        if (config.ENABLE_CLD) {
           const cldData = await uploadToCloudinary(file);
-          console.log("cldData", cldData);
           imgInstance = {
             original_path: file.name,
             url: "",

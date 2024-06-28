@@ -5,10 +5,9 @@ import { fill } from "@cloudinary/url-gen/actions/resize";
 import { autoGravity } from "@cloudinary/url-gen/qualifiers/gravity";
 import { AuthContext } from "../contexts/AuthContext";
 import { config } from "../../config";
-import { ImageInstance, AuthContextType } from "../../types";
+import { ImageInstance, AuthContextType, LibraryProps } from "../../types";
 
-const Library: React.FC = () => {
-  const [imageList, setImageList] = useState<ImageInstance[]>([]);
+const Library: React.FC<LibraryProps> = ({ imageList, setImageList }) => {
   const [selectedImages, setSelectedImages] = useState<ImageInstance[]>([]);
   const [message, setMessage] = useState<{ msg: string; severity: string }>({
     msg: "",
@@ -37,7 +36,7 @@ const Library: React.FC = () => {
 
       const data: ImageInstance[] = await response.json();
       setImageList(data);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching images:", error.message);
       setMessage({
         msg: "Failed to fetch images",
@@ -151,7 +150,7 @@ const Library: React.FC = () => {
         msg: "Selected images deleted successfully",
         severity: "success",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting images:", error.message);
       setMessage({
         msg: "Failed to delete selected images",
@@ -180,6 +179,7 @@ const Library: React.FC = () => {
 
   const updateImageInstance = async (public_id: string) => {
     const alt = altText[public_id];
+    if (alt === "" || undefined) return;
     try {
       const response = await fetch(
         `http://localhost:3000/api/images/update/${public_id}`,

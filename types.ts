@@ -2,7 +2,11 @@
 
 import { Dispatch, SetStateAction } from "react";
 
-// src/types.ts
+export interface LibraryProps {
+  imageList: ImageInstance[];
+  setImageList: React.Dispatch<React.SetStateAction<ImageInstance[]>>;
+}
+
 export interface ImageInstance {
   url: string;
   original_path: string;
