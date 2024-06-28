@@ -1,25 +1,9 @@
 import { useContext, useState } from "react";
 import DropZone from "./DropZone";
-import { Alert, AlertTitle, CircularProgress } from "@mui/material";
+import { Alert, AlertTitle, Button, CircularProgress } from "@mui/material";
 import { AuthContext } from "../contexts/AuthContext";
 import { config } from "../../config";
-
-interface ImageInstance {
-  url: string;
-  original_path: string;
-  bytes: number;
-  public_id: string;
-  secure_url?: string;
-  cld_url?: string;
-  cld_secure_url?: string;
-  format?: string;
-  filename?: string;
-  alt?: string;
-  tags?: string[];
-  dimensions?: { width: {}; height: {} };
-}
-
-type Severity = "error" | "warning" | "info" | "success";
+import { ImageInstance, Severity } from "../../types";
 
 const ImageUpload = () => {
   const [files, setFiles] = useState<File[]>([]);
@@ -31,7 +15,8 @@ const ImageUpload = () => {
     severity: undefined,
   });
   const [uploading, setUploading] = useState(false); // State to track uploading status
-  const { token } = useContext(AuthContext);
+  const authContext = useContext(AuthContext);
+  const token = authContext?.token;
 
   const uploadToCloudinary = async (file: File) => {
     setMessage({
@@ -46,7 +31,7 @@ const ImageUpload = () => {
     data.append("tags", config.CLD_PRESET_NAME);
 
     const response = await fetch(
-      `https://api.cloudinary.com/v1_1/${config.CLD_CLOUD_NAME}/image/upload`,
+      `${config.CLD_API_URL}${config.CLD_CLOUD_NAME}/image/upload`,
       {
         method: "POST",
         body: data,
@@ -65,7 +50,7 @@ const ImageUpload = () => {
   const uploadToServer = async (file: File, instance: ImageInstance) => {
     const uploadFile = async () => {
       setMessage({
-        msg: "Uploading ${file.name} to the server...",
+        msg: `Uploading ${file.name} to the server...`,
         severity: "info",
       });
       const data = new FormData();
@@ -88,7 +73,7 @@ const ImageUpload = () => {
       return result;
     };
 
-    //upload file to the server
+    // upload file to the server
     const uploadResult = await uploadFile();
     setMessage({ msg: uploadResult.message, severity: "info" });
     console.log(uploadResult);
@@ -119,13 +104,13 @@ const ImageUpload = () => {
       if (!response.ok) {
         throw new Error(result.error.message);
       }
+      setMessage({ msg: result.message, severity: "info" });
 
-      return result;
+      return;
     };
 
-    //save instance in database
-    const createResult = await createImageInstance();
-    setMessage({ msg: createResult.message, severity: "info" });
+    // save instance in database
+    await createImageInstance();
   };
 
   const uploadImages = async () => {

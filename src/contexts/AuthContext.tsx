@@ -1,17 +1,5 @@
-import React, {
-  createContext,
-  useState,
-  ReactNode,
-  Dispatch,
-  SetStateAction,
-} from "react";
-
-interface AuthContextType {
-  token: string | null;
-  setToken: Dispatch<SetStateAction<string | null>>;
-  user: any;
-  setUser: Dispatch<SetStateAction<any>>;
-}
+import React, { createContext, useState, ReactNode } from "react";
+import { AuthContextType } from "../../types";
 
 // initial values
 const initialAuthContext: AuthContextType = {
