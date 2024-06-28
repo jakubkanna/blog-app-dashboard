@@ -1,24 +1,24 @@
 import React, { useState, useEffect, useContext } from "react";
-import { AdvancedImage, responsive } from "@cloudinary/react";
 import { Alert, AlertTitle, Button, Card, CardContent } from "@mui/material";
-import { fill } from "@cloudinary/url-gen/actions/resize";
-import { autoGravity } from "@cloudinary/url-gen/qualifiers/gravity";
 import { AuthContext } from "../contexts/AuthContext";
-import { config } from "../../config";
 import { ImageInstance, AuthContextType, LibraryProps } from "../../types";
+import "../styles/Library.scss";
 
 const Library: React.FC<LibraryProps> = ({ imageList, setImageList }) => {
   const [selectedImages, setSelectedImages] = useState<ImageInstance[]>([]);
-  const [message, setMessage] = useState<{ msg: string; severity: string }>({
+  const [message, setMessage] = useState<{
+    msg: string;
+    severity: "error" | "warning" | "info" | "success";
+  }>({
     msg: "",
-    severity: "",
+    severity: "info",
   });
   const [altText, setAltText] = useState<{ [key: string]: string }>({});
   const { token } = useContext<AuthContextType>(AuthContext);
 
   useEffect(() => {
     fetchImages();
-  }, [token]);
+  }, []);
 
   const fetchImages = async () => {
     try {
@@ -37,9 +37,8 @@ const Library: React.FC<LibraryProps> = ({ imageList, setImageList }) => {
       const data: ImageInstance[] = await response.json();
       setImageList(data);
     } catch (error: any) {
-      console.error("Error fetching images:", error.message);
       setMessage({
-        msg: "Failed to fetch images",
+        msg: `Failed to fetch images ${error.message}`,
         severity: "error",
       });
     }
@@ -54,113 +53,52 @@ const Library: React.FC<LibraryProps> = ({ imageList, setImageList }) => {
   };
 
   const deleteSelectedImages = async () => {
+    setMessage({
+      msg: "Deleting images...",
+      severity: "info",
+    });
     try {
-      for (const image of selectedImages) {
-        // Delete from server
-        setMessage({
-          msg: `Deleting ${image.public_id} from the server...`,
-          severity: "info",
-        });
+      const response = await fetch("http://localhost:3000/api/images/destroy", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `${token}`,
+        },
+        body: JSON.stringify({ selectedImages }),
+      });
 
-        const deleteFromServerResponse = await fetch(
-          "http://localhost:3000/api/images/destroy",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `${token}`,
-            },
-            body: JSON.stringify({ selectedImages }),
-          }
-        );
-
-        if (!deleteFromServerResponse.ok) {
-          throw new Error("Failed to delete images from server");
-        }
-
-        const serverResult = await deleteFromServerResponse.json();
-
-        setMessage({
-          msg: serverResult.message,
-          severity: "info",
-        });
-
-        // Delete from Cloudinary if enabled
-        if (config.ENABLE_CLD) {
-          const timestamp = Math.floor(Date.now() / 1000);
-          const api_key = config.CLD_API_KEY;
-          const eager = "";
-
-          setMessage({
-            msg: `Deleting ${image.public_id} from Cloudinary...`,
-            severity: "info",
-          });
-
-          const signatureResponse = await fetch(
-            `http://localhost:3000/api/cld/signature/${image.public_id}/${eager}`,
-            {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `${token}`,
-              },
-            }
-          );
-
-          if (!signatureResponse.ok) {
-            throw new Error("Failed to fetch Cloudinary signature");
-          }
-
-          const { signature } = await signatureResponse.json();
-
-          const deleteResponse = await fetch(
-            `${config.CLD_API_URL}${config.CLD_CLOUD_NAME}/image/destroy`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-              },
-              body: new URLSearchParams({
-                public_id: image.public_id,
-                timestamp: timestamp.toString(),
-                api_key,
-                signature,
-              }),
-            }
-          );
-
-          if (!deleteResponse.ok) {
-            setMessage({
-              msg: `Failed to delete image from Cloudinary: ${image.public_id}`,
-              severity: "error",
-            });
-          }
-        }
+      if (!response.ok) {
+        throw new Error("Failed to delete images from server");
       }
 
-      // Update imageList to exclude deleted images
+      const result = await response.json();
+
+      setMessage({
+        msg: result.message,
+        severity: "success",
+      });
+
       setImageList((prevImageList) =>
-        prevImageList.filter((img) =>
-          selectedImages.every((selImg) => selImg.public_id !== img.public_id)
+        prevImageList.filter(
+          (img) =>
+            !selectedImages.some((selImg) => selImg.public_id === img.public_id)
         )
       );
 
       setSelectedImages([]);
-      setMessage({
-        msg: "Selected images deleted successfully",
-        severity: "success",
-      });
+
+      return result;
     } catch (error: any) {
-      console.error("Error deleting images:", error.message);
       setMessage({
-        msg: "Failed to delete selected images",
+        msg: `Failed to delete selected images, ${error.message}`,
         severity: "error",
       });
     }
   };
 
   const getImageUrl = (img: ImageInstance) => {
-    if (config.USE_HTTPS) {
+    if (false) {
+      //change later
       return img.cld_secure_url ? img.cld_secure_url : img.secure_url;
     } else {
       return img.cld_url ? img.cld_url : img.url;
@@ -179,7 +117,7 @@ const Library: React.FC<LibraryProps> = ({ imageList, setImageList }) => {
 
   const updateImageInstance = async (public_id: string) => {
     const alt = altText[public_id];
-    if (alt === "" || undefined) return;
+    if (alt === "" || alt === undefined) return;
     try {
       const response = await fetch(
         `http://localhost:3000/api/images/update/${public_id}`,
@@ -209,9 +147,8 @@ const Library: React.FC<LibraryProps> = ({ imageList, setImageList }) => {
         severity: "success",
       });
     } catch (error: any) {
-      console.error("Error updating image instance:", error.message);
       setMessage({
-        msg: "Failed to update alt text",
+        msg: `Failed to update alt text ${error.message}`,
         severity: "error",
       });
     }
@@ -236,10 +173,6 @@ const Library: React.FC<LibraryProps> = ({ imageList, setImageList }) => {
       </div>
       <div className="imageLibrary">
         {imageList.map((img) => {
-          const cldImg = config.CLD_INSTANCE.image(img.public_id).resize(
-            fill().width(300).height(300).gravity(autoGravity())
-          );
-
           const imageUrl = getImageUrl(img);
 
           return (
@@ -261,15 +194,11 @@ const Library: React.FC<LibraryProps> = ({ imageList, setImageList }) => {
                   ? "solid #1976d2 1px"
                   : "none",
               }}>
-              {img.cld_url ? (
-                <AdvancedImage
-                  cldImg={cldImg}
-                  plugins={[responsive()]}
-                  alt={img.alt}
-                />
-              ) : (
-                <img src={imageUrl} alt={img.alt} />
-              )}
+              <img
+                src={imageUrl}
+                alt={img.alt}
+                style={{ width: 300, height: 300, objectFit: "cover" }}
+              />
               <CardContent>
                 <div>
                   <label>Filename:</label>
@@ -280,6 +209,15 @@ const Library: React.FC<LibraryProps> = ({ imageList, setImageList }) => {
                   <input
                     type="text"
                     value={`${(img.bytes / 1048576).toFixed(2)} MB`}
+                    className={
+                      img.bytes > 9 * 1048576
+                        ? "orange-red"
+                        : img.bytes > 7 * 1048576
+                        ? "orange"
+                        : img.bytes > 5 * 1048576
+                        ? "light-orange"
+                        : ""
+                    } // color scale 9/7/5
                     readOnly
                   />
                 </div>
@@ -287,7 +225,7 @@ const Library: React.FC<LibraryProps> = ({ imageList, setImageList }) => {
                   <label>Dimensions:</label>
                   <input
                     type="text"
-                    value={`${img.dimensions.width}px x ${img.dimensions.height}px`}
+                    value={`${img.dimensions?.width}px x ${img.dimensions?.height}px`}
                     readOnly
                   />
                 </div>
@@ -297,6 +235,7 @@ const Library: React.FC<LibraryProps> = ({ imageList, setImageList }) => {
                     id="altText"
                     type="text"
                     value={altText[img.public_id] || img.alt || ""}
+                    placeholder="A full plate of spaghetti carbonara topped with creamy sauce."
                     onChange={(e) => handleAltTextChange(e, img.public_id)}
                     onBlur={() => updateImageInstance(img.public_id)}
                   />

@@ -75,12 +75,16 @@ const ImageUpload = ({ imageList, setImageList }) => {
     // upload file to the server
     const uploadResult = await uploadFile();
     setMessage({ msg: uploadResult.message, severity: "info" });
-    instance.original_path = file.name;
-    instance.url = uploadResult.url;
-    instance.secure_url = uploadResult.secure_url;
-    instance.bytes = file.size;
-    instance.dimensions = uploadResult.dimensions;
-    instance.filename = uploadResult.filename;
+
+    //
+    instance.original_filename ||= file.name;
+    instance.url ||= uploadResult.url;
+    instance.secure_url ||= uploadResult.secure_url;
+    instance.bytes ||= uploadResult.size;
+    instance.dimensions ||= uploadResult.dimensions;
+    instance.filename ||= uploadResult.filename;
+    instance.format ||= uploadResult.format;
+    instance.path ||= uploadResult.path;
 
     const createImageInstance = async () => {
       setMessage({
@@ -103,23 +107,31 @@ const ImageUpload = ({ imageList, setImageList }) => {
         throw new Error(result.error.message);
       }
       setMessage({ msg: result.message, severity: "info" });
-      setImageList((prevList) => {
-        const updatedList = prevList.map((item) => {
-          if (item.public_id === result.imageinstance.public_id) {
-            // Replace the existing item with the updated one
-            return result.imageinstance;
-          }
-          return item; // For other items, return unchanged
-        });
-
-        return updatedList;
-      });
-
-      return;
+      return result;
     };
 
     // save instance in database
-    await createImageInstance();
+    const imageInstanceResult = await createImageInstance();
+
+    setImageList((prevList) => {
+      // Check if the new image instance already exists in the list
+      const existingIndex = prevList.findIndex(
+        (item) => item.public_id === imageInstanceResult.imageinstance.public_id
+      );
+
+      if (existingIndex !== -1) {
+        // If the image with the same public_id exists, replace it
+        const updatedList = prevList.map((item, index) =>
+          index === existingIndex ? imageInstanceResult.imageinstance : item
+        );
+        return updatedList;
+      } else {
+        // If the image does not exist (new image), prepend it to the list
+        return [imageInstanceResult.imageinstance, ...prevList];
+      }
+    });
+
+    console.log(imageList);
   };
 
   const uploadImages = async () => {
@@ -129,8 +141,9 @@ const ImageUpload = ({ imageList, setImageList }) => {
     for (let file of files) {
       try {
         let imgInstance: ImageInstance = {
+          original_filename: "",
+          path: "",
           url: "",
-          original_path: "",
           bytes: 0,
           public_id: "",
           dimensions: { width: 0, height: 0 },
@@ -139,7 +152,8 @@ const ImageUpload = ({ imageList, setImageList }) => {
         if (config.ENABLE_CLD) {
           const cldData = await uploadToCloudinary(file);
           imgInstance = {
-            original_path: file.name,
+            original_filename: "",
+            path: "",
             url: "",
             dimensions: { width: cldData.width, height: cldData.height },
             public_id: cldData.public_id,
