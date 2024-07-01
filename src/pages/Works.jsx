@@ -1,15 +1,25 @@
+import { useEffect, useState } from "react";
 import CRUDTable from "../components/CRUDTable";
+import { useWorksContext } from "../contexts/pagesContexts/WorksContext";
 
 function Works() {
-  const { data: events } = [];
+  const [events, setEvents] = useState([]);
+
+  useEffect(() => {
+    fetch("http://localhost:3000/api/events/")
+      .then((response) => response.json())
+      .then((eventData) => setEvents(eventData))
+      .catch((error) => console.error("Failed to fetch events:", error));
+  }, []);
 
   const eventOptions = [
     { value: "", label: "-" },
     ...events.map((event) => ({
-      value: event.id,
+      value: event._id,
       label: event.title,
     })),
   ];
+
   const workColumns = [
     { field: "title", headerName: "Title", flex: 1, editable: true },
     { field: "medium", headerName: "Medium", flex: 1, editable: true },
@@ -40,7 +50,7 @@ function Works() {
     },
   ];
 
-  return <CRUDTable columns={workColumns} />;
+  return <CRUDTable columns={workColumns} context={useWorksContext} />;
 }
 
 export default Works;

@@ -8,6 +8,7 @@ import { useContext, useEffect } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import { EditorContext } from "../../contexts/EditorContext";
 import { MessageContext } from "../../contexts/MessageContext";
+import { Button } from "@mui/material";
 
 export default function Editor({ isUpdateUrl, idParam }) {
   const navigate = useNavigate();

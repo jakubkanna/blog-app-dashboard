@@ -4,7 +4,7 @@ import { Alert, AlertTitle, Button, CircularProgress } from "@mui/material";
 import { AuthContext } from "../contexts/AuthContext";
 import { Severity } from "../../types";
 
-const ImageUpload = ({ imageList, setImageList }) => {
+const ImageUpload = ({ setImageList }) => {
   const [files, setFiles] = useState<File[]>([]);
   const [message, setMessage] = useState<{
     msg: string;

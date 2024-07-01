@@ -16,7 +16,10 @@ import usePermissions from "./hooks/usePermissions";
 import Editor from "./components/editor/Editor";
 import { EditorContextProvider } from "./contexts/EditorContext";
 import PageContainer from "./components/PageContainer";
-import { EventsProvider } from "./contexts/EventsContext";
+import { EventsProvider } from "./contexts/pagesContexts/EventsContext";
+import { PostsProvider } from "./contexts/pagesContexts/PostsContext";
+import { WorksProvider } from "./contexts/pagesContexts/WorksContext";
+
 import Images from "./pages/Images";
 
 const ProtectedAdmin = () => {
@@ -77,14 +80,31 @@ const routes = [
           },
           {
             element: <PageContainer title="Works" />,
-            children: [{ path: "works", element: <Works />, name: "Works" }],
+            children: [
+              {
+                path: "works",
+                element: (
+                  <WorksProvider>
+                    <Works />
+                  </WorksProvider>
+                ),
+                name: "Works",
+              },
+            ],
           },
           {
             path: "posts",
             element: <PageContainer title="Posts" />,
             name: "Posts",
             children: [
-              { path: "", element: <Posts /> },
+              {
+                path: "",
+                element: (
+                  <PostsProvider>
+                    <Posts />
+                  </PostsProvider>
+                ),
+              },
               {
                 path: "create",
                 element: <EditorWithContext />,

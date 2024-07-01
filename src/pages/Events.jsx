@@ -1,21 +1,50 @@
-import { useState } from "react";
+/**
+ * TODO:
+ *
+ * Images column,
+ * Tags column,
+ *
+ * Display of subtitle, description
+ *
+ * Dispaly of date icon, dispaly format of date
+ *
+ * Display of external link
+ */
+import { useState, useEffect } from "react";
 import CRUDTable from "../components/CRUDTable";
 import { Button } from "@mui/material";
 import EditorModal from "../components/editor/EditorModal.jsx";
-import { useEventsContext } from "../contexts/EventsContext"; // Import context hook
+import { useEventsContext } from "../contexts/pagesContexts/EventsContext"; // Import context hook
 
 export default function Events() {
-  const { data: posts } = [];
+  const [posts, setPosts] = useState([]);
   const { updateData } = useEventsContext();
   const [modalOpen, setModalOpen] = useState(false);
   const [params, setParams] = useState(null);
   const [initVal, setInitVal] = useState("");
 
+  const fetchPosts = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/api/posts/");
+      if (!response.ok) {
+        throw new Error("Failed to fetch posts");
+      }
+      const data = await response.json();
+      setPosts(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
   const postOptions = [
     { title: "-", id: "" },
     ...posts.map((post) => ({
       title: post.title,
-      id: post.id,
+      id: post._id,
     })),
   ];
 

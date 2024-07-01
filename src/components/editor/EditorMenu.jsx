@@ -1,6 +1,7 @@
 import { Plus } from "lucide-react";
 import { useContext, useState } from "react";
 import { EditorContext } from "../../contexts/EditorContext";
+import { Button } from "@mui/material";
 
 export default function EditorMenu() {
   const { blocks, setBlocks } = useContext(EditorContext);

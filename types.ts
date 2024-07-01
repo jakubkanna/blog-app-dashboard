@@ -1,6 +1,6 @@
 // src/types.ts
 
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, ReactNode, SetStateAction } from "react";
 
 export interface LibraryProps {
   imageList: ImageInstance[];
@@ -30,3 +30,7 @@ export interface AuthContextType {
   user: any;
   setUser: Dispatch<SetStateAction<any>>;
 }
+
+export type ProviderProps = {
+  children: ReactNode;
+};

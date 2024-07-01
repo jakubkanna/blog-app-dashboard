@@ -9,7 +9,7 @@ export default function Images() {
 
   return (
     <>
-      <ImageUpload imageList={imageList} setImageList={setImageList} />
+      <ImageUpload setImageList={setImageList} />
       <Library imageList={imageList} setImageList={setImageList} />
     </>
   );

@@ -1,4 +1,5 @@
 import CRUDTable from "../components/CRUDTable";
+import { usePostsContext } from "../contexts/pagesContexts/PostsContext";
 
 function Posts() {
   const postColumns = [
@@ -21,7 +22,7 @@ function Posts() {
       type: "boolean",
     },
   ];
-  return <CRUDTable columns={postColumns} />;
+  return <CRUDTable columns={postColumns} context={usePostsContext} />;
 }
 
 export default Posts;

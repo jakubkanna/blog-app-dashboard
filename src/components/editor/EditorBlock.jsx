@@ -2,6 +2,7 @@ import { memo, useState } from "react";
 import EditorBlockText from "./EditorBlockText";
 import EditorBlockImage from "./EditorBlockImage";
 import { Delete } from "lucide-react";
+import { Button } from "@mui/material";
 
 const EditorBlock = memo(function EditorBlock({ props }) {
   // memo to re render only on param change

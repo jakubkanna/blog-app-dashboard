@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { AuthContext } from "./AuthContext";
+import { AuthContext } from "../AuthContext";
+import { ProviderProps } from "../../../types";
 
 export type Event = {
   id: string;
@@ -35,7 +36,7 @@ export const useEventsContext = () => {
   return context;
 };
 
-export const EventsProvider: React.FC = ({ children }) => {
+export const EventsProvider: React.FC<ProviderProps> = ({ children }) => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const { token } = useContext(AuthContext);
