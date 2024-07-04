@@ -1,22 +1,26 @@
 import { useState } from "react";
-import PropTypes from "prop-types";
 import { Modal, Box, Button } from "@mui/material";
 import { Editor } from "@tinymce/tinymce-react";
+import { useGridApiContext } from "@mui/x-data-grid";
 
-const EditorModal = ({ open, handleClose, title, initialValue, onSubmit }) => {
-  const [editorContent, setEditorContent] = useState(initialValue);
+const EditorModal = ({ params, onClose }) => {
+  const [editorContent, setEditorContent] = useState(params.value);
+  const apiRef = useGridApiContext();
+
+  const handleEditorSubmit = async () => {
+    const id = params.id;
+    const field = params.field;
+    console.log(id, field, editorContent);
+    apiRef.current.setEditCellValue({ id, field, value: editorContent });
+    onClose();
+  };
 
   const handleEditorChange = (content) => {
     setEditorContent(content);
   };
 
-  const handleSave = () => {
-    onSubmit(editorContent);
-    handleClose();
-  };
-
   return (
-    <Modal open={open} onClose={handleClose}>
+    <Modal open={true} onClose={onClose}>
       <Box
         sx={{
           position: "absolute",
@@ -27,13 +31,13 @@ const EditorModal = ({ open, handleClose, title, initialValue, onSubmit }) => {
           boxShadow: 24,
           p: 4,
           width: "80%",
-          maxWidth: "600px",
+          maxWidth: "720px",
         }}>
-        <h1>{title?.toUpperCase()}</h1>
+        <h1>{params?.row.title + " - " + params?.field.toUpperCase()}</h1>
         <Editor
           tinymceScriptSrc="/tinymce/tinymce.min.js"
           licenseKey="gpl"
-          initialValue={initialValue}
+          initialValue={params.value}
           init={{
             selector: "textarea",
             height: 500,
@@ -63,20 +67,15 @@ const EditorModal = ({ open, handleClose, title, initialValue, onSubmit }) => {
           }}
           onEditorChange={handleEditorChange}
         />
-        <Button onClick={handleSave} variant="contained" color="primary">
+        <Button
+          onClick={handleEditorSubmit}
+          variant="contained"
+          color="primary">
           Save
         </Button>
       </Box>
     </Modal>
   );
-};
-
-EditorModal.propTypes = {
-  title: PropTypes.string,
-  open: PropTypes.bool.isRequired,
-  handleClose: PropTypes.func.isRequired,
-  initialValue: PropTypes.string.isRequired,
-  onSubmit: PropTypes.func.isRequired,
 };
 
 export default EditorModal;

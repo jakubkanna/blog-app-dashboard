@@ -53,8 +53,8 @@ export const EventsProvider: React.FC<ProviderProps> = ({ children }) => {
         title: event.title,
         subtitle: event.subtitle,
         description: event.description,
-        start_date: new Date(event.start_date), // Ensure date is converted properly
-        end_date: event.end_date ? new Date(event.end_date) : undefined, // Convert if exists
+        start_date: new Date(event.start_date),
+        end_date: event.end_date ? new Date(event.end_date) : undefined,
         venue: event.venue,
         tags: event.tags,
         images: event.images,
@@ -73,11 +73,7 @@ export const EventsProvider: React.FC<ProviderProps> = ({ children }) => {
   };
 
   const updateEvent = async (newRow: Event): Promise<Event> => {
-    const requestBody = {
-      ...newRow,
-      post: newRow.post === "" ? null : newRow.post,
-    };
-
+    const requestBody = newRow;
     const eventId = requestBody.id;
 
     try {
@@ -93,19 +89,22 @@ export const EventsProvider: React.FC<ProviderProps> = ({ children }) => {
         }
       );
 
+      const result = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update event");
+        throw new Error(result.message || "Failed to update event");
       }
 
-      const updatedEvent: Event = await response.json();
+      const updatedEvent: Event = result;
       updatedEvent.id = updatedEvent._id;
 
-      setEvents((prevEvents) =>
-        prevEvents.map((event) =>
+      setEvents((prevEvents) => {
+        const updatedEvents = prevEvents.map((event) =>
           event.id === updatedEvent.id ? updatedEvent : event
-        )
-      );
+        );
+        return updatedEvents;
+      });
+
       return updatedEvent;
     } catch (error) {
       console.error(error);

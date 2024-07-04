@@ -2,11 +2,12 @@
 
 import { Dispatch, ReactNode, SetStateAction } from "react";
 
-export interface LibraryProps {
+export interface ImageLibraryProps {
   imageList: ImageInstance[];
   setImageList: React.Dispatch<React.SetStateAction<ImageInstance[]>>;
 }
 export interface ImageInstance {
+  _id: string;
   public_id: string;
   original_filename: string;
   filename?: string;
@@ -34,3 +35,17 @@ export interface AuthContextType {
 export type ProviderProps = {
   children: ReactNode;
 };
+
+export interface ImagesModalProps {
+  open: boolean;
+  handleClose: () => void;
+  params: {
+    id: string;
+    row: {
+      title: string;
+    };
+    field: string;
+  };
+  initialValue: ImageInstance[];
+  onSubmit: (selectedImages: string[]) => void;
+}

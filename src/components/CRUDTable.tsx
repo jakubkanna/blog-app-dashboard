@@ -1,5 +1,4 @@
 import * as React from "react";
-import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
@@ -83,7 +82,7 @@ export default function CRUDTable({ columns, context }: CRUDTableProps) {
   const navigate = useNavigate();
 
   React.useMemo(() => {
-    data && setRows(data);
+    setRows(data);
   }, [data]);
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
@@ -156,19 +155,17 @@ export default function CRUDTable({ columns, context }: CRUDTableProps) {
       }
     } else {
       try {
-        // const updatedItem =
-        await updateData(newRow);
+        const updatedItem = await updateData(newRow);
 
         setSnackbar({
           children: "Item successfully updated",
           severity: "success",
         });
-        const updatedRow = { ...newRow, isNew: false };
 
-        // setRows((rows) =>
-        //   rows.map((row) => (row.id === updatedItem.id ? updatedRow : row))
-        // );
-        return updatedRow;
+        setRows((rows) =>
+          rows.map((row) => (row.id === newRow.id ? updatedItem : row))
+        );
+        return updatedItem;
       } catch (error) {
         console.error(error);
         throw error;

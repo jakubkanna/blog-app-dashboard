@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Alert, AlertTitle, Button, Card, CardContent } from "@mui/material";
 import { AuthContext } from "../contexts/AuthContext";
-import { ImageInstance, AuthContextType, LibraryProps } from "../../types";
+import { ImageInstance, AuthContextType, ImageLibraryProps } from "../../types";
 import "../styles/Library.scss";
+import useImageUrl from "../hooks/useImageURL";
 
-const Library: React.FC<LibraryProps> = ({ imageList, setImageList }) => {
+const ImagesLibrary: React.FC<ImageLibraryProps> = ({
+  imageList,
+  setImageList,
+}) => {
   const [selectedImages, setSelectedImages] = useState<ImageInstance[]>([]);
   const [message, setMessage] = useState<{
     msg: string;
@@ -17,32 +21,20 @@ const Library: React.FC<LibraryProps> = ({ imageList, setImageList }) => {
   const { token } = useContext<AuthContextType>(AuthContext);
 
   useEffect(() => {
-    fetchImages();
+    fetch("http://localhost:3000/api/images", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `${token}`,
+      },
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error("Failed to fetch images");
+        return response.json();
+      })
+      .then((data) => setImageList(data))
+      .catch((error) => console.error("Failed to fetch images", error));
   }, []);
-
-  const fetchImages = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/api/images", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch images");
-      }
-
-      const data: ImageInstance[] = await response.json();
-      setImageList(data);
-    } catch (error: any) {
-      setMessage({
-        msg: `Failed to fetch images ${error.message}`,
-        severity: "error",
-      });
-    }
-  };
 
   const toggleSelectImage = (image: ImageInstance) => {
     setSelectedImages((prevSelectedImages) =>
@@ -67,9 +59,7 @@ const Library: React.FC<LibraryProps> = ({ imageList, setImageList }) => {
         body: JSON.stringify({ selectedImages }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to delete images from server");
-      }
+      if (!response.ok) throw new Error("Failed to delete images from server");
 
       const result = await response.json();
 
@@ -96,14 +86,7 @@ const Library: React.FC<LibraryProps> = ({ imageList, setImageList }) => {
     }
   };
 
-  const getImageUrl = (img: ImageInstance) => {
-    if (false) {
-      //change later
-      return img.cld_secure_url ? img.cld_secure_url : img.secure_url;
-    } else {
-      return img.cld_url ? img.cld_url : img.url;
-    }
-  };
+  const { getImageUrl } = useImageUrl();
 
   const handleAltTextChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -255,4 +238,4 @@ const Library: React.FC<LibraryProps> = ({ imageList, setImageList }) => {
   );
 };
 
-export default Library;
+export default ImagesLibrary;

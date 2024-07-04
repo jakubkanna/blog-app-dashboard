@@ -4,24 +4,22 @@
  * Images column,
  * Tags column,
  *
- * Display of subtitle, description
  *
- * Dispaly of date icon, dispaly format of date
+ *  dispaly format of date
  *
  * Display of external link
  */
 import { useState, useEffect } from "react";
-import CRUDTable from "../components/CRUDTable";
 import { Button } from "@mui/material";
-import EditorModal from "../components/editor/EditorModal.jsx";
-import { useEventsContext } from "../contexts/pagesContexts/EventsContext"; // Import context hook
+import CRUDTable from "../components/CRUDTable";
+import { useEventsContext } from "../contexts/pagesContexts/EventsContext";
+import EditorModal from "../components/editor/EditorModal";
+import ImagesModal from "../components/ImagesModal";
+import { Link } from "react-router-dom";
+import { ExternalLink, LinkIcon } from "lucide-react";
 
 export default function Events() {
   const [posts, setPosts] = useState([]);
-  const { updateData } = useEventsContext();
-  const [modalOpen, setModalOpen] = useState(false);
-  const [params, setParams] = useState(null);
-  const [initVal, setInitVal] = useState("");
 
   const fetchPosts = async () => {
     try {
@@ -48,30 +46,57 @@ export default function Events() {
     })),
   ];
 
-  const openModal = (params) => {
-    setParams(params);
-    setInitVal(params.value);
-    setModalOpen(true);
-  };
+  const TextModalCell = ({ params }) => {
+    const [editing, setEditing] = useState(false);
 
-  const handleModalClose = () => {
-    setModalOpen(false);
-  };
+    const handleEditClick = () => {
+      setEditing(true);
+    };
 
-  const handleEditorSubmit = async (newContent) => {
-    const newRow = { ...params.row };
-    newRow[params.field] = newContent;
-    await updateData(newRow);
-  };
+    const handleClose = () => {
+      setEditing(false);
+    };
 
-  const modalCell = (params) => {
     return (
-      <Button
-        variant="contained"
-        size="small"
-        onClick={() => openModal(params)}>
-        Edit
-      </Button>
+      <>
+        <Button variant="contained" size="small" onClick={handleEditClick}>
+          Edit
+        </Button>
+        {editing && <EditorModal params={params} onClose={handleClose} />}
+      </>
+    );
+  };
+
+  const ImageCell = ({ params }) => {
+    const [editing, setEditing] = useState(false);
+
+    const handleEditClick = () => {
+      setEditing(true);
+    };
+
+    const handleClose = () => {
+      setEditing(false);
+    };
+
+    return (
+      <>
+        <Button variant="contained" size="small" onClick={handleEditClick}>
+          Edit
+        </Button>
+        {editing && <ImagesModal onClose={handleClose} params={params} />}
+      </>
+    );
+  };
+
+  const renderExternalLinks = (params) => {
+    if (!params.value || params.value.length === 0) return null;
+
+    return (
+      <>
+        {params.value.map((link, index) => (
+          <ExternalLink key={index} href={link} />
+        ))}
+      </>
     );
   };
 
@@ -82,14 +107,16 @@ export default function Events() {
       headerName: "Subtitle",
       flex: 1,
       editable: true,
-      renderEditCell: (params) => modalCell(params),
+      renderEditCell: (params) => <TextModalCell params={params} />,
+      valueFormatter: (v) => (v ? v.replace(/<[^>]*>?/gm, "") : ""),
     },
     {
       field: "description",
       headerName: "Description",
       flex: 1,
       editable: true,
-      renderEditCell: (params) => modalCell(params),
+      renderEditCell: (params) => <TextModalCell params={params} />,
+      valueFormatter: (v) => (v ? v.replace(/<[^>]*>?/gm, "") : ""),
     },
     {
       field: "start_date",
@@ -97,6 +124,7 @@ export default function Events() {
       type: "date",
       flex: 1,
       editable: true,
+
       valueFormatter: (value) => {
         if (!value) return "N/A";
         const isoDate = new Date(value);
@@ -123,21 +151,7 @@ export default function Events() {
       headerName: "Images",
       flex: 1,
       editable: true,
-      cellEditorParams: {
-        separator: ",",
-      },
-      valueFormatter: (value) => {
-        if (Array.isArray(value)) {
-          return value.join(", ");
-        }
-        return value;
-      },
-      valueParser: (value) => {
-        if (typeof value === "string") {
-          return value.split(",").map((tag) => tag.trim().toLowerCase());
-        }
-        return value;
-      },
+      renderEditCell: (params) => <ImageCell params={params} />,
     },
     {
       field: "tags",
@@ -166,6 +180,7 @@ export default function Events() {
       flex: 1,
       editable: true,
     },
+
     {
       field: "post",
       headerName: "Post",
@@ -194,15 +209,6 @@ export default function Events() {
   return (
     <div>
       <CRUDTable columns={eventColumns} context={useEventsContext} />
-
-      <EditorModal
-        key={params?.id}
-        title={params?.field}
-        open={modalOpen}
-        handleClose={handleModalClose}
-        initialValue={initVal}
-        onSubmit={handleEditorSubmit}
-      />
     </div>
   );
 }

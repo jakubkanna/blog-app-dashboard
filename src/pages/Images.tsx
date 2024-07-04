@@ -1,6 +1,6 @@
 import "../styles/Images.scss";
-import ImageUpload from "../components/ImageUpload";
-import Library from "../components/Library";
+import ImagesUploader from "../components/ImagesUploader";
+import ImagesLibrary from "../components/ImagesLibrary";
 import { ImageInstance } from "../../types";
 import { useState } from "react";
 
@@ -9,8 +9,8 @@ export default function Images() {
 
   return (
     <>
-      <ImageUpload setImageList={setImageList} />
-      <Library imageList={imageList} setImageList={setImageList} />
+      <ImagesUploader setImageList={setImageList} />
+      <ImagesLibrary imageList={imageList} setImageList={setImageList} />
     </>
   );
 }

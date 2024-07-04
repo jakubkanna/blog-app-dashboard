@@ -1,3 +1,13 @@
+/**
+ * TODO:
+ *
+ * Year col
+ *
+ * Images col
+ *
+ * Events col (multi select)
+ */
+
 import { useEffect, useState } from "react";
 import CRUDTable from "../components/CRUDTable";
 import { useWorksContext } from "../contexts/pagesContexts/WorksContext";
