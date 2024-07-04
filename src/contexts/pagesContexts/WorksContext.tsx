@@ -6,14 +6,12 @@ export type Work = {
   _id: string;
   id: string;
   title: string;
-  medium: string[];
+  medium?: string[];
   year?: number;
-  images: string[];
-  events: string[];
-  tags: string[];
-  public: boolean;
-  timestamp: Date;
-  modified?: Date;
+  images?: string[];
+  events?: string[];
+  tags?: string[];
+  public?: boolean;
 };
 
 type WorksContextType = {
@@ -69,12 +67,10 @@ export const WorksProvider: React.FC<ProviderProps> = ({ children }) => {
   };
 
   const updateWork = async (newRow: Work): Promise<Work> => {
-    const requestBody = {
-      ...newRow,
-      events: newRow.events.length === 0 ? null : newRow.events,
-    };
-
+    const requestBody = newRow;
     const workId = requestBody.id;
+
+    console.log("req.body, updateWork:", requestBody);
 
     try {
       const response = await fetch(
@@ -110,11 +106,7 @@ export const WorksProvider: React.FC<ProviderProps> = ({ children }) => {
   };
 
   const createWork = async (newRow: Work): Promise<Work> => {
-    const requestBody = {
-      ...newRow,
-      events: newRow.events.length === 0 ? null : newRow.events,
-    };
-
+    const requestBody = newRow;
     try {
       const response = await fetch("http://localhost:3000/api/works/create", {
         method: "POST",
@@ -130,16 +122,13 @@ export const WorksProvider: React.FC<ProviderProps> = ({ children }) => {
         throw new Error(result.error.message || "Failed to create work");
       }
 
-      const createdWork: any = await response.json();
+      const newWork: any = await response.json();
 
-      const workWithId: Work = {
-        ...createdWork.newWork,
-        id: createdWork.newWork._id,
-      };
+      newWork.id = newWork._id;
 
-      setWorks((prevWorks) => [...prevWorks, workWithId]);
+      setWorks((prevWorks) => [...prevWorks, newWork]);
 
-      return workWithId;
+      return newWork;
     } catch (error) {
       console.error(error);
       throw error;

@@ -8,14 +8,14 @@ export type Event = {
   title: string;
   subtitle?: string;
   description?: string;
-  start_date: Date;
+  start_date?: Date;
   end_date?: Date;
   venue?: string;
-  tags: string[];
-  images: string[];
+  tags?: string[];
+  images?: string[];
   post?: string;
-  external_url: string;
-  public: boolean;
+  external_urls?: string[];
+  public?: boolean;
 };
 
 type EventsContextType = {
@@ -53,13 +53,13 @@ export const EventsProvider: React.FC<ProviderProps> = ({ children }) => {
         title: event.title,
         subtitle: event.subtitle,
         description: event.description,
-        start_date: new Date(event.start_date),
+        start_date: event.start_date ? new Date(event.start_date) : undefined,
         end_date: event.end_date ? new Date(event.end_date) : undefined,
         venue: event.venue,
         tags: event.tags,
         images: event.images,
         post: event.post,
-        external_url: event.external_url,
+        external_urls: event.external_urls,
         public: event.public,
       }));
 

@@ -1,13 +1,6 @@
 /**
  * TODO:
- *
- * Images column,
- * Tags column,
- *
- *
- *  dispaly format of date
- *
- * Display of external link
+ * Generate post button
  */
 import { useState, useEffect } from "react";
 import { Button } from "@mui/material";
@@ -15,27 +8,16 @@ import CRUDTable from "../components/CRUDTable";
 import { useEventsContext } from "../contexts/pagesContexts/EventsContext";
 import EditorModal from "../components/editor/EditorModal";
 import ImagesModal from "../components/ImagesModal";
-import { Link } from "react-router-dom";
-import { ExternalLink, LinkIcon } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 
 export default function Events() {
   const [posts, setPosts] = useState([]);
 
-  const fetchPosts = async () => {
-    try {
-      const response = await fetch("http://localhost:3000/api/posts/");
-      if (!response.ok) {
-        throw new Error("Failed to fetch posts");
-      }
-      const data = await response.json();
-      setPosts(data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   useEffect(() => {
-    fetchPosts();
+    fetch("http://localhost:3000/api/posts/")
+      .then((response) => response.json())
+      .then((postsData) => setPosts(postsData))
+      .catch((error) => console.error("Failed to fetch events:", error));
   }, []);
 
   const postOptions = [
@@ -84,18 +66,6 @@ export default function Events() {
           Edit
         </Button>
         {editing && <ImagesModal onClose={handleClose} params={params} />}
-      </>
-    );
-  };
-
-  const renderExternalLinks = (params) => {
-    if (!params.value || params.value.length === 0) return null;
-
-    return (
-      <>
-        {params.value.map((link, index) => (
-          <ExternalLink key={index} href={link} />
-        ))}
       </>
     );
   };
@@ -152,6 +122,7 @@ export default function Events() {
       flex: 1,
       editable: true,
       renderEditCell: (params) => <ImageCell params={params} />,
+      valueFormatter: (v) => (v?.length > 0 ? "..." : ""),
     },
     {
       field: "tags",
@@ -175,12 +146,32 @@ export default function Events() {
       },
     },
     {
-      field: "external_url",
-      headerName: "Ext. Link",
+      field: "external_urls",
+      headerName: "Ext. Links",
       flex: 1,
       editable: true,
+      valueParser: (value) => {
+        if (typeof value === "string") {
+          return value.split(",").map((url) => url.trim());
+        }
+        return value;
+      },
+      renderCell: (params) => {
+        return (
+          <div>
+            {params.value?.map((url, index) => (
+              <a
+                key={index}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer">
+                <ExternalLink />
+              </a>
+            ))}
+          </div>
+        );
+      },
     },
-
     {
       field: "post",
       headerName: "Post",
@@ -191,9 +182,7 @@ export default function Events() {
       getOptionValue: (value) => value.id,
       getOptionLabel: (value) => value.title,
       valueGetter: (value) => {
-        if (!value) {
-          return postOptions.length > 0 ? postOptions[0].id : "";
-        }
+        if (!value) return postOptions.length > 0 ? postOptions[0].id : "";
         return value;
       },
     },

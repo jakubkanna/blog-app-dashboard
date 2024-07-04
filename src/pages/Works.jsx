@@ -1,16 +1,7 @@
-/**
- * TODO:
- *
- * Year col
- *
- * Images col
- *
- * Events col (multi select)
- */
-
 import { useEffect, useState } from "react";
 import CRUDTable from "../components/CRUDTable";
 import { useWorksContext } from "../contexts/pagesContexts/WorksContext";
+import MultiSelect from "../components/MuiTableMultiselectCell"; // Make sure the import path is correct
 
 function Works() {
   const [events, setEvents] = useState([]);
@@ -22,13 +13,19 @@ function Works() {
       .catch((error) => console.error("Failed to fetch events:", error));
   }, []);
 
-  const eventOptions = [
-    { value: "", label: "-" },
-    ...events.map((event) => ({
-      value: event._id,
-      label: event.title,
-    })),
-  ];
+  const eventOptions = events.map((event) => ({
+    label: event.title,
+    id: event._id,
+  }));
+
+  const getEventTitles = (ids) => {
+    return ids
+      .map((id) => {
+        const event = events.find((event) => event._id === id);
+        return event ? event.title : "Unknown";
+      })
+      .join(", ");
+  };
 
   const workColumns = [
     { field: "title", headerName: "Title", flex: 1, editable: true },
@@ -40,15 +37,12 @@ function Works() {
       headerName: "Events",
       flex: 1,
       editable: true,
-      type: "singleSelect",
-      valueOptions: eventOptions,
-      valueField: "value",
-      displayField: "label",
-      renderCell: (params) => {
-        const selectedEvent = eventOptions.find(
-          (option) => option.value === params.value[0]
-        );
-        return selectedEvent?.label || "";
+      renderEditCell: (params) => {
+        return <MultiSelect params={params} options={eventOptions} />;
+      },
+      valueFormatter: (value) => {
+        if (!value) return "";
+        return getEventTitles(value);
       },
     },
     {
