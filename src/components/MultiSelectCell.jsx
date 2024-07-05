@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { FormControl, MenuItem, OutlinedInput, Select } from "@mui/material";
 import { GridCheckIcon, useGridApiContext } from "@mui/x-data-grid";
+import PropTypes from "prop-types";
 
 const MultiSelect = ({ options, params }) => {
   const [selectedOptions, setSelectedOptions] = useState([]);
@@ -69,6 +70,19 @@ const MultiSelect = ({ options, params }) => {
       </Select>
     </FormControl>
   );
+};
+
+MultiSelect.propTypes = {
+  options: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      label: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+  params: PropTypes.shape({
+    id: PropTypes.any.isRequired,
+    field: PropTypes.string.isRequired,
+  }).isRequired,
 };
 
 export default MultiSelect;

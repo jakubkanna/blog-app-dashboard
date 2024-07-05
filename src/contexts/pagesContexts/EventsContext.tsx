@@ -1,32 +1,8 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { AuthContext } from "../AuthContext";
-import { ProviderProps } from "../../../types";
+import { ProviderProps, Event, PageContextType } from "../../../types";
 
-export type Event = {
-  id: string;
-  _id: string;
-  title: string;
-  subtitle?: string;
-  description?: string;
-  start_date?: Date;
-  end_date?: Date;
-  venue?: string;
-  tags?: string[];
-  images?: string[];
-  post?: string;
-  external_urls?: string[];
-  public?: boolean;
-};
-
-type EventsContextType = {
-  data: Event[];
-  updateData: (newRow: Event) => Promise<Event>;
-  createData: (newRow: Event) => Promise<Event>;
-  deleteData: (eventId: string) => void;
-  loading: boolean;
-};
-
-const EventsContext = createContext<EventsContextType | undefined>(undefined);
+const EventsContext = createContext<PageContextType | undefined>(undefined);
 
 export const useEventsContext = () => {
   const context = useContext(EventsContext);
@@ -58,7 +34,7 @@ export const EventsProvider: React.FC<ProviderProps> = ({ children }) => {
         venue: event.venue,
         tags: event.tags,
         images: event.images,
-        post: event.post,
+        post: event.post || "",
         external_urls: event.external_urls,
         public: event.public,
       }));
@@ -73,12 +49,13 @@ export const EventsProvider: React.FC<ProviderProps> = ({ children }) => {
   };
 
   const updateEvent = async (newRow: Event): Promise<Event> => {
+    if (newRow.post === "") newRow.post = null;
+
     const requestBody = newRow;
-    const eventId = requestBody.id;
 
     try {
       const response = await fetch(
-        `http://localhost:3000/api/events/update/${eventId}`,
+        `http://localhost:3000/api/events/update/${requestBody.id}`,
         {
           method: "POST",
           headers: {
@@ -88,7 +65,6 @@ export const EventsProvider: React.FC<ProviderProps> = ({ children }) => {
           body: JSON.stringify(requestBody),
         }
       );
-
       const result = await response.json();
 
       if (!response.ok) {
@@ -113,11 +89,9 @@ export const EventsProvider: React.FC<ProviderProps> = ({ children }) => {
   };
 
   const createEvent = async (newRow: Event): Promise<Event> => {
-    const requestBody = {
-      ...newRow,
-      post: newRow.post === "" ? null : newRow.post,
-    };
+    if (newRow.post === "") newRow.post = null;
 
+    const requestBody = newRow;
     try {
       const response = await fetch("http://localhost:3000/api/events/create", {
         method: "POST",
@@ -184,8 +158,8 @@ export const EventsProvider: React.FC<ProviderProps> = ({ children }) => {
     <EventsContext.Provider
       value={{
         data: events,
-        updateData: updateEvent,
         createData: createEvent,
+        updateData: updateEvent,
         deleteData: deleteEvent,
         loading,
       }}>

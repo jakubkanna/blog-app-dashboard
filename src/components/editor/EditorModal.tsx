@@ -1,9 +1,15 @@
-import { useState } from "react";
+import { GridRenderCellParams } from "@mui/x-data-grid";
+import React, { useState } from "react";
 import { Modal, Box, Button } from "@mui/material";
 import { Editor } from "@tinymce/tinymce-react";
 import { useGridApiContext } from "@mui/x-data-grid";
 
-const EditorModal = ({ params, onClose }) => {
+interface EditorModalProps {
+  params: GridRenderCellParams;
+  onClose: () => void;
+}
+
+const EditorModal: React.FC<EditorModalProps> = ({ params, onClose }) => {
   const [editorContent, setEditorContent] = useState(params.value);
   const apiRef = useGridApiContext();
 
@@ -15,7 +21,7 @@ const EditorModal = ({ params, onClose }) => {
     onClose();
   };
 
-  const handleEditorChange = (content) => {
+  const handleEditorChange = (content: string) => {
     setEditorContent(content);
   };
 
@@ -39,7 +45,6 @@ const EditorModal = ({ params, onClose }) => {
           licenseKey="gpl"
           initialValue={params.value}
           init={{
-            selector: "textarea",
             height: 500,
             menubar: false,
             branding: false,
@@ -57,7 +62,6 @@ const EditorModal = ({ params, onClose }) => {
               "table",
               "help",
               "wordcount",
-              "code",
             ],
             toolbar:
               "undo redo | blocks | " +

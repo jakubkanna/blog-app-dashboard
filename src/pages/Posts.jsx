@@ -1,4 +1,4 @@
-import CRUDTable from "../components/CRUDTable";
+import MuiTable from "../components/MuiTable";
 import { usePostsContext } from "../contexts/pagesContexts/PostsContext";
 
 function Posts() {
@@ -22,7 +22,7 @@ function Posts() {
       type: "boolean",
     },
   ];
-  return <CRUDTable columns={postColumns} context={usePostsContext} />;
+  return <MuiTable columns={postColumns} context={usePostsContext} />;
 }
 
 export default Posts;

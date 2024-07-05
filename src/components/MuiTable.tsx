@@ -22,6 +22,7 @@ import {
 import { randomId } from "@mui/x-data-grid-generator";
 import { Alert, AlertProps, Snackbar } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
+import { PageContextType } from "../../types";
 
 interface EditToolbarProps {
   setRows: (newRows: (oldRows: GridRowsProp) => GridRowsProp) => void;
@@ -57,19 +58,13 @@ function EditToolbar(props: EditToolbarProps) {
   );
 }
 
-interface CRUDTableProps {
+interface MuiTableProps {
   columns: GridColDef[];
-  context: () => {
-    data: any[];
-    loading: Boolean;
-    updateData: (data: any) => Promise<any>;
-    createData: (data: any) => Promise<any>;
-    deleteData: (id: GridRowId) => Promise<void>;
-  };
+  context: () => PageContextType;
 }
 
-export default function CRUDTable({ columns, context }: CRUDTableProps) {
-  const { data, updateData, createData, deleteData, loading } = context();
+export default function MuiTable({ columns, context }: MuiTableProps) {
+  const { data, updateData, createData, deleteData } = context();
   const [rows, setRows] = React.useState<GridRowsProp>([]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
@@ -188,7 +183,7 @@ export default function CRUDTable({ columns, context }: CRUDTableProps) {
       type: "actions",
       headerName: "Actions",
       flex: 1,
-      getActions: ({ id }) => {
+      getActions: ({ id }: { id: GridRowId }) => {
         const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
 
         if (isInEditMode) {
@@ -197,11 +192,13 @@ export default function CRUDTable({ columns, context }: CRUDTableProps) {
               icon={<SaveIcon />}
               label="Save"
               onClick={handleSaveClick(id)}
+              key="save"
             />,
             <GridActionsCellItem
               icon={<CancelIcon />}
               label="Cancel"
               onClick={handleCancelClick(id)}
+              key="cancel"
             />,
           ];
         }
@@ -211,16 +208,18 @@ export default function CRUDTable({ columns, context }: CRUDTableProps) {
             icon={<EditIcon />}
             label="Edit"
             onClick={handleEditClick(id)}
+            key="edit"
           />,
           <GridActionsCellItem
             icon={<DeleteIcon />}
             label="Delete"
             onClick={handleDeleteClick(id)}
+            key="delete"
           />,
         ];
       },
     },
-  ].filter(Boolean) as GridColDef[];
+  ];
 
   return (
     <>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import CRUDTable from "../components/CRUDTable";
+import MuiTable from "../components/MuiTable";
 import { useWorksContext } from "../contexts/pagesContexts/WorksContext";
-import MultiSelect from "../components/MuiTableMultiselectCell"; // Make sure the import path is correct
+import MultiSelect from "../components/MultiSelectCell";
 
 function Works() {
   const [events, setEvents] = useState([]);
@@ -54,7 +54,7 @@ function Works() {
     },
   ];
 
-  return <CRUDTable columns={workColumns} context={useWorksContext} />;
+  return <MuiTable columns={workColumns} context={useWorksContext} />;
 }
 
 export default Works;

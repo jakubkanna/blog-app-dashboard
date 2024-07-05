@@ -49,3 +49,27 @@ export interface ImagesModalProps {
   initialValue: ImageInstance[];
   onSubmit: (selectedImages: string[]) => void;
 }
+
+export type Event = {
+  id: string;
+  _id: string;
+  title: string;
+  subtitle?: string;
+  description?: string;
+  start_date?: Date;
+  end_date?: Date;
+  venue?: string;
+  tags?: string[];
+  images?: string[];
+  post?: string | null;
+  external_urls?: string[];
+  public?: boolean;
+};
+
+export type PageContextType = {
+  data: any[];
+  createData: (data: any) => Promise<any>;
+  updateData: (data: any) => Promise<any>;
+  deleteData: (id: any) => Promise<void>;
+  loading: Boolean;
+};
