@@ -17,13 +17,9 @@ const MultiSelect = ({ options, params }) => {
   };
 
   const renderValue = (selected) => {
-    const selectedItems = selected.map((id) =>
-      options.find((opt) => opt.id === id)
+    const selectedItems = selected.map((value) =>
+      options.find((opt) => opt.value === value)
     );
-
-    if (selectedItems.length === 0) {
-      return <em>Select options</em>;
-    }
 
     if (selectedItems.length === 1) {
       return selectedItems[0].label;
@@ -37,7 +33,7 @@ const MultiSelect = ({ options, params }) => {
   };
 
   return (
-    <FormControl sx={{ width: "100%" }}>
+    <FormControl sx={{ width: "100%" }} id="multiselect-cell">
       <Select
         multiple
         value={selectedOptions}
@@ -60,9 +56,9 @@ const MultiSelect = ({ options, params }) => {
           });
         }}>
         {options.map((option) => (
-          <MenuItem key={option.id} value={option.id}>
+          <MenuItem key={option.value} value={option.value}>
             {option.label}
-            {selectedOptions.includes(option.id) ? (
+            {selectedOptions.includes(option.value) ? (
               <GridCheckIcon color="info" />
             ) : null}
           </MenuItem>
@@ -75,14 +71,14 @@ const MultiSelect = ({ options, params }) => {
 MultiSelect.propTypes = {
   options: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.string.isRequired,
+      value: PropTypes.string.isRequired,
       label: PropTypes.string.isRequired,
     })
-  ).isRequired,
+  ),
   params: PropTypes.shape({
     id: PropTypes.any.isRequired,
     field: PropTypes.string.isRequired,
-  }).isRequired,
+  }),
 };
 
 export default MultiSelect;

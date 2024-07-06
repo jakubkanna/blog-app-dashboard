@@ -1,11 +1,13 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useParams } from "react-router-dom";
 
-export default function PageContainer({ title }) {
+const PageContainer = ({ title }) => {
+  const { id } = useParams();
+
   return (
     <>
       <div className="container">
         <div className="container-header">
-          <h1>{title}</h1>
+          <h1>{title.replace(":id", id || "")}</h1>
         </div>
         <div className="container-body">
           <Outlet />
@@ -14,4 +16,6 @@ export default function PageContainer({ title }) {
       </div>
     </>
   );
-}
+};
+
+export default PageContainer;

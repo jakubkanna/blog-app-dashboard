@@ -8,7 +8,6 @@ import { useGridApiContext } from "@mui/x-data-grid";
 const ImagesModal: React.FC<ImagesModalProps> = ({ onClose, params }) => {
   const [selectedImgList, setSelectedImgList] = useState<ImageInstance[]>([]);
   const [imgList, setImgList] = useState<ImageInstance[]>([]);
-  const apiRef = useGridApiContext();
 
   useEffect(() => {
     fetch("http://localhost:3000/api/images")
@@ -38,7 +37,6 @@ const ImagesModal: React.FC<ImagesModalProps> = ({ onClose, params }) => {
     const id = params.id;
     const field = params.field;
     const selectedImageIds = selectedImgList.map((image) => image._id);
-    apiRef.current.setEditCellValue({ id, field, value: selectedImageIds });
     onClose();
   };
 

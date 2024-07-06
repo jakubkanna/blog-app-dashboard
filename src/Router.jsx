@@ -21,6 +21,7 @@ import { PostsProvider } from "./contexts/pagesContexts/PostsContext";
 import { WorksProvider } from "./contexts/pagesContexts/WorksContext";
 
 import Images from "./pages/Images";
+import EventForm from "./components/EventForm";
 
 const ProtectedAdmin = () => {
   const { isAdmin, isLoading } = usePermissions();
@@ -65,20 +66,6 @@ const routes = [
             children: [{ path: "images", element: <Images />, name: "Images" }],
           },
           {
-            element: <PageContainer title="Events" />,
-            children: [
-              {
-                path: "events",
-                element: (
-                  <EventsProvider>
-                    <Events />
-                  </EventsProvider>
-                ),
-                name: "Events",
-              },
-            ],
-          },
-          {
             element: <PageContainer title="Works" />,
             children: [
               {
@@ -89,6 +76,26 @@ const routes = [
                   </WorksProvider>
                 ),
                 name: "Works",
+              },
+            ],
+          },
+          {
+            path: "events",
+            element: <PageContainer title="Events" />,
+            name: "Events",
+            children: [
+              {
+                path: "",
+                element: (
+                  <EventsProvider>
+                    <Events />
+                  </EventsProvider>
+                ),
+              },
+              {
+                path: "update/:id",
+                element: <EventForm />,
+                name: "Update Event",
               },
             ],
           },

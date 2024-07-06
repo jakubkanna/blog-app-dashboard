@@ -74,7 +74,6 @@ const ImagesUploader = ({ setImageList }) => {
 
   return (
     <>
-      <h2>Add Image</h2>
       <DropZone props={{ files, setFiles }} />
       {message.msg && (
         <Alert severity={message.severity}>

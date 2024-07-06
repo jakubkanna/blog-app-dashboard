@@ -90,10 +90,18 @@ export default function MuiTable({ columns, context }: MuiTableProps) {
   };
 
   const handleEditClick = (id: GridRowId) => () => {
-    if (location.pathname === "/admin/posts") {
-      navigate(`update/${id}`);
-    } else {
-      setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
+    const rowData = rows.find((row) => row.id === id);
+    switch (location.pathname) {
+      case "/admin/posts":
+      case "/admin/events":
+        navigate(`update/${id}`, { state: { rowData } });
+        break;
+      default:
+        setRowModesModel({
+          ...rowModesModel,
+          [id]: { mode: GridRowModes.Edit },
+        });
+        break;
     }
   };
 

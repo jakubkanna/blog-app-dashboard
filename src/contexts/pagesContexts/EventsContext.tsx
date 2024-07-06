@@ -29,13 +29,13 @@ export const EventsProvider: React.FC<ProviderProps> = ({ children }) => {
         title: event.title,
         subtitle: event.subtitle,
         description: event.description,
-        start_date: event.start_date ? new Date(event.start_date) : undefined,
-        end_date: event.end_date ? new Date(event.end_date) : undefined,
+        start_date: event.start_date,
+        end_date: event.end_date,
         venue: event.venue,
         tags: event.tags,
         images: event.images,
         post: event.post || "",
-        external_urls: event.external_urls,
+        external_url: event.external_url,
         public: event.public,
       }));
 
@@ -49,7 +49,7 @@ export const EventsProvider: React.FC<ProviderProps> = ({ children }) => {
   };
 
   const updateEvent = async (newRow: Event): Promise<Event> => {
-    if (newRow.post === "") newRow.post = null;
+    if (newRow.post === "") newRow.post = undefined;
 
     const requestBody = newRow;
 
@@ -89,7 +89,7 @@ export const EventsProvider: React.FC<ProviderProps> = ({ children }) => {
   };
 
   const createEvent = async (newRow: Event): Promise<Event> => {
-    if (newRow.post === "") newRow.post = null;
+    if (newRow.post === "") newRow.post = undefined;
 
     const requestBody = newRow;
     try {

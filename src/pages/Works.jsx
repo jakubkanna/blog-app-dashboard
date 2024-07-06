@@ -15,7 +15,7 @@ function Works() {
 
   const eventOptions = events.map((event) => ({
     label: event.title,
-    id: event._id,
+    value: event._id,
   }));
 
   const getEventTitles = (ids) => {

@@ -1,3 +1,4 @@
+import { Box, Typography } from "@mui/material";
 import { useDropzone } from "react-dropzone";
 
 const thumbsContainer = {
@@ -65,12 +66,39 @@ export default function DropZone({ props }) {
   ));
 
   return (
-    <section className="container">
-      <div {...getRootProps({ className: "dropzone" })}>
+    <Box sx={{ marginTop: 2 }}>
+      <Box
+        {...getRootProps({
+          className: "dropzone",
+          sx: {
+            border: "1px dashed grey",
+            color: "grey",
+            minHeight: "100px",
+            borderRadius: 1,
+            padding: 2,
+            display: "flex",
+            justifContent: "centner",
+            alignItems: "center",
+            cursor: "pointer",
+            "&:hover": {
+              backgroundColor: "#f0f0f0",
+            },
+          },
+        })}>
         <input {...getInputProps()} />
-        <p>Drag "n" drop some files here, or click to select files</p>
-      </div>
-      <aside style={thumbsContainer}>{thumbs}</aside>
-    </section>
+        <Typography variant="body1">
+          Drag 'n' drop some files here, or click to select files
+        </Typography>
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          flexWrap: "wrap",
+          marginTop: 2,
+        }}>
+        {thumbs}
+      </Box>
+    </Box>
   );
 }

@@ -50,21 +50,21 @@ export interface ImagesModalProps {
   onSubmit: (selectedImages: string[]) => void;
 }
 
-export type Event = {
+export type Event = Partial<{
   id: string;
   _id: string;
   title: string;
-  subtitle?: string;
-  description?: string;
-  start_date?: Date;
-  end_date?: Date;
-  venue?: string;
-  tags?: string[];
-  images?: string[];
-  post?: string | null;
-  external_urls?: string[];
-  public?: boolean;
-};
+  subtitle: string;
+  description: string;
+  start_date: Date;
+  end_date: Date;
+  venue: string;
+  tags: string[];
+  images: ImageInstance[];
+  post: string;
+  external_url: URL;
+  public: boolean;
+}>;
 
 export type PageContextType = {
   data: any[];
@@ -73,3 +73,16 @@ export type PageContextType = {
   deleteData: (id: any) => Promise<void>;
   loading: Boolean;
 };
+
+export interface Option {
+  value: string;
+  label: string;
+}
+
+export interface SelectProps {
+  label: string;
+  options: Option[];
+  onBlur: () => void;
+  onChange: () => void;
+  initVal: Option[];
+}
