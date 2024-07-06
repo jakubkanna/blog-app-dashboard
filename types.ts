@@ -60,7 +60,7 @@ export type Event = Partial<{
   end_date: Date;
   venue: string;
   tags: string[];
-  images: ImageInstance[];
+  images: string[];
   post: string;
   external_url: URL;
   public: boolean;

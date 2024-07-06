@@ -54,9 +54,9 @@ const ImagesUploader = ({ setImageList }) => {
       });
 
       // Update the image list without adding duplicates
-      setImageList((prevList) => {
+      setImageList((prevList: any[]) => {
         const newImages = result.imageInstances.filter(
-          (newImage) =>
+          (newImage: { public_id: any }) =>
             !prevList.some((image) => image.public_id === newImage.public_id)
         );
         return [...newImages, ...prevList];

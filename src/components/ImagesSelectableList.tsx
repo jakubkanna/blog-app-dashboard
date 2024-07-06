@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid, Box, Typography } from "@mui/material";
+import { Grid, Box, Typography, Button } from "@mui/material";
 import { ImageInstance } from "../../types";
 import useImageUrl from "../hooks/useImageURL";
 import { randomId } from "@mui/x-data-grid-generator";
@@ -13,7 +13,13 @@ const ImagesSelectableList: React.FC<ImagesSelectableListProps> = ({
   imageList,
   setImageList,
 }) => {
-  const handleImageClick = (clickedImage: ImageInstance) => {
+  const { getImageUrl } = useImageUrl();
+
+  const handleImageClick = (
+    e: React.MouseEvent<HTMLDivElement>,
+    clickedImage: ImageInstance
+  ) => {
+    e.preventDefault();
     setImageList((prevList) => {
       const imageExists = prevList.some(
         (image) => image._id === clickedImage._id
@@ -26,13 +32,17 @@ const ImagesSelectableList: React.FC<ImagesSelectableListProps> = ({
       }
     });
   };
-  const { getImageUrl } = useImageUrl();
+
   return (
     <Grid container spacing={2}>
       {imageList &&
         imageList.map((image) => (
           <Grid item xs={3} key={image._id || randomId()}>
-            <Box
+            <Button
+              key={image._id}
+              id="image-button"
+              type="button"
+              onClick={(e) => handleImageClick(e, image)}
               sx={{
                 position: "relative",
                 width: "100px",
@@ -52,8 +62,7 @@ const ImagesSelectableList: React.FC<ImagesSelectableListProps> = ({
                 "&:hover .overlay": {
                   opacity: 1,
                 },
-              }}
-              onClick={() => handleImageClick(image)}>
+              }}>
               <img
                 src={getImageUrl(image)}
                 alt={image.filename}
@@ -92,7 +101,7 @@ const ImagesSelectableList: React.FC<ImagesSelectableListProps> = ({
                   {image.filename}
                 </Typography>
               </Box>
-            </Box>
+            </Button>
           </Grid>
         ))}
     </Grid>

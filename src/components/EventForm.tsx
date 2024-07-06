@@ -1,3 +1,5 @@
+// EventForm.tsx
+
 import * as React from "react";
 import {
   TextField,
@@ -29,23 +31,13 @@ export default function EventForm() {
   const location = useLocation();
   const [posts, setPosts] = React.useState<Option[]>([]);
   const [tags, setTags] = React.useState<Option[]>([]);
-  const [selectedImgList, setSelectedImgList] = React.useState<ImageInstance[]>(
-    []
-  );
-  const [imgList, setImgList] = React.useState<ImageInstance[]>([]);
   const [formData, setFormData] = React.useState<Event | null>(null);
+  const [initImgs, setInitImgs] = React.useState<ImageInstance[]>([]);
 
-  //fetch data
+  // Fetching images and posts moved to respective components
 
   React.useEffect(() => {
-    //get all images
-    fetch("http://localhost:3000/api/images")
-      .then((response) => response.json())
-      .then((data: ImageInstance[]) => {
-        if (data.length > 0) setImgList(data);
-      })
-      .catch((error) => console.error("Failed to fetch images", error));
-    //get all posts
+    // Fetch posts
     fetch("http://localhost:3000/api/posts/")
       .then((response) => response.json())
       .then((postsData) => {
@@ -58,7 +50,7 @@ export default function EventForm() {
         setPosts([{ label: "-", value: "" }, ...formattedPosts]);
       })
       .catch((error) => console.error("Failed to fetch posts:", error));
-    //get all tags
+    // Fetch tags
     fetch("http://localhost:3000/api/tags/")
       .then((response) => response.json())
       .then((tagsData) =>
@@ -68,18 +60,17 @@ export default function EventForm() {
   }, []);
 
   React.useEffect(() => {
-    //get formData from location state
+    // Fetch formData from location state
     const rowData = location.state?.rowData;
     if (rowData) {
       setFormData({ ...rowData });
-      setSelectedImgList(rowData.images);
-      //get this event images
+      // Fetch event images
       fetch(`http://localhost:3000/api/events/${rowData.id}/images`)
         .then((response) => response.json())
-        .then((data: ImageInstance[]) => setSelectedImgList(data))
+        .then((data: ImageInstance[]) => data.length && setInitImgs(data))
         .catch((error) => console.error("Failed to fetch event images", error));
     }
-  }, [location.state]);
+  }, []);
 
   // Handlers
 
@@ -125,8 +116,15 @@ export default function EventForm() {
     }));
   };
 
+  const handleImagesChange = (value: ImageInstance[]) => {
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      images: value.map((img) => img._id),
+    }));
+  };
+
   const handleSubmit = () => {
-    console.log(formData);
+    console.log("SUBMIT", formData);
   };
 
   // Render
@@ -179,11 +177,8 @@ export default function EventForm() {
                   Images
                 </Typography>
                 <ImageSelectionPaper
-                  selectedImgList={selectedImgList}
-                  setSelectedImgList={setSelectedImgList}
-                  imgList={imgList}
-                  setImgList={setImgList}
-                  onBlur={handleSubmit}
+                  initVal={initImgs}
+                  onChange={handleImagesChange}
                 />
               </Grid>
             </Grid>
