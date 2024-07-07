@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Box, Typography, Paper, InputLabel } from "@mui/material";
+import { Box, Paper, InputLabel } from "@mui/material";
 import ImagesSelectableList from "./ImagesSelectableList";
 import ImagesUploader from "./ImagesUploader";
 import { ImageInstance } from "../../types";
@@ -7,11 +7,13 @@ import { ImageInstance } from "../../types";
 interface ImageSelectionPaperProps {
   initVal: ImageInstance[];
   onChange: (value: ImageInstance[]) => void;
+  onBlur?: (cb: () => void) => void;
 }
 
 const ImageSelectionPaper: React.FC<ImageSelectionPaperProps> = ({
   initVal,
   onChange,
+  onBlur,
 }) => {
   const [selectedImgList, setSelectedImgList] = useState<ImageInstance[]>([]);
   const [images, setImages] = useState<ImageInstance[]>([]);
@@ -41,33 +43,36 @@ const ImageSelectionPaper: React.FC<ImageSelectionPaperProps> = ({
     fetchAllImgs();
   }, []);
 
-  const handleImageSubmit = () => {
-    onChange(selectedImgList);
-  };
-
   const handleFocus = () => {
     setIsActive(true);
   };
 
-  const handleBlur = (event: MouseEvent) => {
+  const handleOutsideClick = (event: MouseEvent) => {
     if (paperRef.current && !paperRef.current.contains(event.target as Node)) {
       setIsActive(false);
     }
   };
 
   useEffect(() => {
-    document.addEventListener("click", handleBlur);
+    document.addEventListener("click", handleOutsideClick);
     return () => {
-      document.removeEventListener("click", handleBlur);
+      document.removeEventListener("click", handleOutsideClick);
     };
   }, []);
 
+  //on change
   useEffect(() => {
-    if (!isActive) {
-      handleImageSubmit();
+    onChange(selectedImgList);
+  }, [selectedImgList]);
+  //on blur
+  useEffect(() => {
+    if (!isActive && onBlur) {
+      onBlur(() => {
+        // Define any specific logic for onBlur callback if needed
+        console.log("Blur callback executed");
+      });
     }
-  }, [isActive]);
-
+  }, [isActive, onBlur]);
   return (
     <Paper
       ref={paperRef}
@@ -85,10 +90,6 @@ const ImageSelectionPaper: React.FC<ImageSelectionPaperProps> = ({
           </Box>
 
           <ImagesUploader setImageList={setSelectedImgList} />
-
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Library
-          </Typography>
 
           {images.length > 0 ? (
             <ImagesSelectableList

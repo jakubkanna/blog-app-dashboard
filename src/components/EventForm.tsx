@@ -1,7 +1,7 @@
+// public submit, selected images field click
 import * as React from "react";
 import {
   TextField,
-  Checkbox,
   FormControlLabel,
   Grid,
   Typography,
@@ -13,8 +13,9 @@ import {
   AlertProps,
   Snackbar,
   Alert,
+  Switch,
+  Button,
 } from "@mui/material";
-import { useLocation } from "react-router-dom";
 import { Event, ImageInstance } from "../../types";
 import CustomEditor from "./CustomEditor";
 import ImageSelectionPaper from "./ImageSelectionPaper";
@@ -24,6 +25,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 import { useEventsContext } from "../contexts/pagesContexts/EventsContext";
 import _ from "lodash";
+import { Form, useParams } from "react-router-dom";
 
 interface Option {
   value: string;
@@ -31,21 +33,31 @@ interface Option {
 }
 
 export default function EventForm() {
-  const [loading, setLoading] = React.useState(true);
-  const location = useLocation();
   const [posts, setPosts] = React.useState<Option[]>([]);
   const [tags, setTags] = React.useState<Option[]>([]);
   const [formData, setFormData] = React.useState<Event | null>(null);
   const [initImgs, setInitImgs] = React.useState<ImageInstance[]>([]);
+  const [initData, setInitData] = React.useState<Event>();
   const { updateData } = useEventsContext();
   const [snackbar, setSnackbar] = React.useState<Pick<
     AlertProps,
     "children" | "severity"
   > | null>(null);
+  let { id: eventId } = useParams();
 
   // Fetching images and posts moved to respective components
 
   React.useEffect(() => {
+    // Fetch formData
+    fetch(`http://localhost:3000/api/events/${eventId}`)
+      .then((response) => response.json())
+      .then((data: Event) => data && setInitData(data))
+      .catch((error) => console.error("Failed to fetch event ", error));
+    // Fetch event images
+    fetch(`http://localhost:3000/api/events/${eventId}/images`)
+      .then((response) => response.json())
+      .then((data: ImageInstance[]) => data.length && setInitImgs(data))
+      .catch((error) => console.error("Failed to fetch event images", error));
     // Fetch posts
     fetch("http://localhost:3000/api/posts/")
       .then((response) => response.json())
@@ -69,22 +81,16 @@ export default function EventForm() {
   }, []);
 
   React.useEffect(() => {
-    // Fetch formData from location state
-    const rowData = location.state.rowData;
-    if (rowData) {
-      setFormData({ ...rowData });
-      setLoading(false);
-      // Fetch event images
-      fetch(`http://localhost:3000/api/events/${rowData.id}/images`)
-        .then((response) => response.json())
-        .then((data: ImageInstance[]) => data.length && setInitImgs(data))
-        .catch((error) => console.error("Failed to fetch event images", error));
-    }
-  }, [location.state]);
+    if (!initData) return;
+    setFormData({ ...initData });
+  }, [initData]);
 
   // Handlers
 
-  const handleSubmit = () => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!!formData && _.isEqual(formData, initData)) return;
     updateData(formData)
       .then(() => {
         setSnackbar({
@@ -101,11 +107,6 @@ export default function EventForm() {
       });
   };
 
-  React.useEffect(() => {
-    const rowData = location.state?.rowData;
-    if (!loading && formData && !_.isEqual(formData, rowData)) handleSubmit();
-  }, [formData]);
-
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
     setFormData((prevFormData) => ({
@@ -116,16 +117,15 @@ export default function EventForm() {
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: checked,
-    }));
+    setFormData((prevFormData) => {
+      return { ...prevFormData, [name]: checked };
+    });
   };
 
-  const handleTagsChange = (_event: React.SyntheticEvent, value: Option[]) => {
+  const handleTagsChange = (_event: React.SyntheticEvent, value: any) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
-      tags: value.map((tag) => tag.value),
+      tags: value,
     }));
   };
 
@@ -156,9 +156,9 @@ export default function EventForm() {
 
   return (
     formData && (
-      <form>
+      <Form onSubmit={handleSubmit}>
         <Typography variant="h2" gutterBottom>
-          Editing <em>{formData.title}</em>
+          Editing: <em>{formData.title}</em>
         </Typography>
         <Grid container spacing={2}>
           <Grid item xs={8}>
@@ -170,8 +170,8 @@ export default function EventForm() {
                 <TextField
                   label="Title"
                   name="title"
-                  defaultValue={formData.title}
-                  onBlur={handleInputChange}
+                  value={formData.title}
+                  onChange={handleInputChange}
                   fullWidth
                   margin="normal"
                 />
@@ -183,7 +183,7 @@ export default function EventForm() {
                 <CustomEditor
                   id="subtitle"
                   initialValue={formData.subtitle}
-                  onBlur={handleSubmit}
+                  onBlur={handleInputChange}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -193,7 +193,7 @@ export default function EventForm() {
                 <CustomEditor
                   id="description"
                   initialValue={formData.description}
-                  onBlur={handleSubmit}
+                  onBlur={handleInputChange}
                 />
               </Grid>
               <Grid item xs={12}>
@@ -238,7 +238,7 @@ export default function EventForm() {
                     label="Venue"
                     name="venue"
                     defaultValue={formData.venue}
-                    onBlur={handleInputChange}
+                    onChange={handleInputChange}
                     fullWidth
                     margin="normal"
                   />
@@ -250,34 +250,11 @@ export default function EventForm() {
             </Typography>
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={12}>
-                <Autocomplete
-                  multiple
-                  id="tags-outlined"
-                  options={tags}
-                  getOptionLabel={(option) => option.label}
-                  value={tags.filter(
-                    (tag) => formData.tags && formData.tags.includes(tag.value)
-                  )}
-                  onChange={handleTagsChange}
-                  isOptionEqualToValue={(option, value) =>
-                    option.value === value.value
-                  }
-                  filterSelectedOptions
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Tags"
-                      placeholder="Select tags..."
-                    />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={12}>
                 <TextField
                   label="External URL"
                   name="external_url"
                   defaultValue={formData.external_url}
-                  onBlur={handleInputChange}
+                  onChange={handleInputChange}
                   fullWidth
                   margin="normal"
                 />
@@ -301,9 +278,22 @@ export default function EventForm() {
                 </FormControl>
               </Grid>
               <Grid item xs={12}>
+                <Autocomplete
+                  multiple
+                  id="tags-filled"
+                  options={tags.map((option) => option.label)}
+                  value={formData.tags}
+                  onChange={handleTagsChange}
+                  freeSolo
+                  renderInput={(params) => (
+                    <TextField {...params} label="Tags" placeholder="Tags" />
+                  )}
+                />
+              </Grid>
+              <Grid item xs={12}>
                 <FormControlLabel
                   control={
-                    <Checkbox
+                    <Switch
                       checked={formData.public}
                       onChange={handleCheckboxChange}
                       name="public"
@@ -311,6 +301,23 @@ export default function EventForm() {
                   }
                   label="Public"
                 />
+                <Grid
+                  item
+                  xs={12}
+                  sx={{
+                    position: "fixed",
+                    right: 0,
+                    bottom: 0,
+                    margin: "1rem",
+                  }}>
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    color="primary"
+                    size="large">
+                    Save
+                  </Button>
+                </Grid>
               </Grid>
             </Grid>
           </Grid>
@@ -324,7 +331,7 @@ export default function EventForm() {
             <Alert {...snackbar} onClose={handleCloseSnackbar} />
           </Snackbar>
         )}
-      </form>
+      </Form>
     )
   );
 }

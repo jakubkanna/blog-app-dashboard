@@ -53,7 +53,7 @@ export const EventsProvider: React.FC<ProviderProps> = ({ children }) => {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/api/events/update/${requestBody.id}`,
+        `http://localhost:3000/api/events/update/${requestBody._id}`,
         {
           method: "POST",
           headers: {
