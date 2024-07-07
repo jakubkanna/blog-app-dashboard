@@ -23,6 +23,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 import { useEventsContext } from "../contexts/pagesContexts/EventsContext";
+import _ from "lodash";
 
 interface Option {
   value: string;
@@ -30,6 +31,7 @@ interface Option {
 }
 
 export default function EventForm() {
+  const [loading, setLoading] = React.useState(true);
   const location = useLocation();
   const [posts, setPosts] = React.useState<Option[]>([]);
   const [tags, setTags] = React.useState<Option[]>([]);
@@ -68,9 +70,10 @@ export default function EventForm() {
 
   React.useEffect(() => {
     // Fetch formData from location state
-    const rowData = location.state?.rowData;
+    const rowData = location.state.rowData;
     if (rowData) {
       setFormData({ ...rowData });
+      setLoading(false);
       // Fetch event images
       fetch(`http://localhost:3000/api/events/${rowData.id}/images`)
         .then((response) => response.json())
@@ -98,7 +101,10 @@ export default function EventForm() {
       });
   };
 
-  React.useEffect(handleSubmit, [formData]);
+  React.useEffect(() => {
+    const rowData = location.state?.rowData;
+    if (!loading && formData && !_.isEqual(formData, rowData)) handleSubmit();
+  }, [formData]);
 
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
@@ -284,7 +290,7 @@ export default function EventForm() {
                     id="simple-select"
                     name="post"
                     label="Post"
-                    value={formData.post}
+                    value={formData.post ?? ""}
                     onChange={handleInputChange}>
                     {posts.map((option) => (
                       <MenuItem key={option.value} value={option.value}>
