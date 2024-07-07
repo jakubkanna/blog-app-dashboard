@@ -61,7 +61,7 @@ export type Event = Partial<{
   venue: string;
   tags: string[];
   images: string[];
-  post: string;
+  post: string | null;
   external_url: URL;
   public: boolean;
 }>;

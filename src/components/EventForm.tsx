@@ -1,5 +1,3 @@
-// EventForm.tsx
-
 import * as React from "react";
 import {
   TextField,
@@ -12,6 +10,9 @@ import {
   Select,
   MenuItem,
   Autocomplete,
+  AlertProps,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { useLocation } from "react-router-dom";
 import { Event, ImageInstance } from "../../types";
@@ -21,6 +22,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
+import { useEventsContext } from "../contexts/pagesContexts/EventsContext";
 
 interface Option {
   value: string;
@@ -33,6 +35,11 @@ export default function EventForm() {
   const [tags, setTags] = React.useState<Option[]>([]);
   const [formData, setFormData] = React.useState<Event | null>(null);
   const [initImgs, setInitImgs] = React.useState<ImageInstance[]>([]);
+  const { updateData } = useEventsContext();
+  const [snackbar, setSnackbar] = React.useState<Pick<
+    AlertProps,
+    "children" | "severity"
+  > | null>(null);
 
   // Fetching images and posts moved to respective components
 
@@ -70,15 +77,34 @@ export default function EventForm() {
         .then((data: ImageInstance[]) => data.length && setInitImgs(data))
         .catch((error) => console.error("Failed to fetch event images", error));
     }
-  }, []);
+  }, [location.state]);
 
   // Handlers
 
-  const handleChange = (e: any) => {
+  const handleSubmit = () => {
+    updateData(formData)
+      .then(() => {
+        setSnackbar({
+          children: "Event successfully updated",
+          severity: "success",
+        });
+      })
+      .catch((error) => {
+        console.error("Update error:", error);
+        setSnackbar({
+          children: "Event update error",
+          severity: "error",
+        });
+      });
+  };
+
+  React.useEffect(handleSubmit, [formData]);
+
+  const handleInputChange = (e: any) => {
     const { name, value } = e.target;
     setFormData((prevFormData) => ({
       ...prevFormData,
-      [name as string]: value,
+      [name]: value,
     }));
   };
 
@@ -96,11 +122,6 @@ export default function EventForm() {
       tags: value.map((tag) => tag.value),
     }));
   };
-
-  React.useEffect(
-    () => handleSubmit(),
-    [handleTagsChange, handleCheckboxChange]
-  );
 
   const handleStartDateChange = (date: dayjs.Dayjs | null) => {
     setFormData((prevFormData) => ({
@@ -123,9 +144,7 @@ export default function EventForm() {
     }));
   };
 
-  const handleSubmit = () => {
-    console.log("SUBMIT", formData);
-  };
+  const handleCloseSnackbar = () => setSnackbar(null);
 
   // Render
 
@@ -145,9 +164,8 @@ export default function EventForm() {
                 <TextField
                   label="Title"
                   name="title"
-                  value={formData.title}
-                  onChange={handleChange}
-                  onBlur={handleSubmit}
+                  defaultValue={formData.title}
+                  onBlur={handleInputChange}
                   fullWidth
                   margin="normal"
                 />
@@ -213,9 +231,8 @@ export default function EventForm() {
                   <TextField
                     label="Venue"
                     name="venue"
-                    value={formData.venue}
-                    onChange={handleChange}
-                    onBlur={handleSubmit}
+                    defaultValue={formData.venue}
+                    onBlur={handleInputChange}
                     fullWidth
                     margin="normal"
                   />
@@ -236,7 +253,6 @@ export default function EventForm() {
                     (tag) => formData.tags && formData.tags.includes(tag.value)
                   )}
                   onChange={handleTagsChange}
-                  onBlur={handleSubmit}
                   isOptionEqualToValue={(option, value) =>
                     option.value === value.value
                   }
@@ -254,9 +270,8 @@ export default function EventForm() {
                 <TextField
                   label="External URL"
                   name="external_url"
-                  value={formData.external_url}
-                  onChange={handleChange}
-                  onBlur={handleSubmit}
+                  defaultValue={formData.external_url}
+                  onBlur={handleInputChange}
                   fullWidth
                   margin="normal"
                 />
@@ -268,10 +283,9 @@ export default function EventForm() {
                     labelId="simple-select-label"
                     id="simple-select"
                     name="post"
-                    value={formData.post}
                     label="Post"
-                    onBlur={handleSubmit}
-                    onChange={handleChange}>
+                    value={formData.post}
+                    onChange={handleInputChange}>
                     {posts.map((option) => (
                       <MenuItem key={option.value} value={option.value}>
                         {option.label}
@@ -295,6 +309,15 @@ export default function EventForm() {
             </Grid>
           </Grid>
         </Grid>
+        {!!snackbar && (
+          <Snackbar
+            open
+            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+            onClose={handleCloseSnackbar}
+            autoHideDuration={6000}>
+            <Alert {...snackbar} onClose={handleCloseSnackbar} />
+          </Snackbar>
+        )}
       </form>
     )
   );

@@ -9,7 +9,7 @@ interface CustomEditorProps {
 
 const CustomEditor: React.FC<CustomEditorProps> = ({
   id,
-  initialValue,
+  initialValue = "",
   onBlur,
 }) => {
   const [editorContent, setEditorContent] = useState<string>(initialValue);

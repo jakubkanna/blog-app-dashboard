@@ -81,7 +81,11 @@ const routes = [
           },
           {
             path: "events",
-            element: <PageContainer title="Events" />,
+            element: (
+              <EventsProvider>
+                <PageContainer title="Events" />
+              </EventsProvider>
+            ),
             name: "Events",
             children: [
               {

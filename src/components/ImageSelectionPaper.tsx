@@ -52,7 +52,6 @@ const ImageSelectionPaper: React.FC<ImageSelectionPaperProps> = ({
   const handleBlur = (event: MouseEvent) => {
     if (paperRef.current && !paperRef.current.contains(event.target as Node)) {
       setIsActive(false);
-      handleImageSubmit();
     }
   };
 
@@ -62,6 +61,12 @@ const ImageSelectionPaper: React.FC<ImageSelectionPaperProps> = ({
       document.removeEventListener("click", handleBlur);
     };
   }, []);
+
+  useEffect(() => {
+    if (!isActive) {
+      handleImageSubmit();
+    }
+  }, [isActive]);
 
   return (
     <Paper

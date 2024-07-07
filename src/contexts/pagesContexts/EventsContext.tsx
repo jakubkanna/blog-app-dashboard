@@ -49,8 +49,6 @@ export const EventsProvider: React.FC<ProviderProps> = ({ children }) => {
   };
 
   const updateEvent = async (newRow: Event): Promise<Event> => {
-    if (newRow.post === "") newRow.post = undefined;
-
     const requestBody = newRow;
 
     try {
@@ -89,8 +87,6 @@ export const EventsProvider: React.FC<ProviderProps> = ({ children }) => {
   };
 
   const createEvent = async (newRow: Event): Promise<Event> => {
-    if (newRow.post === "") newRow.post = undefined;
-
     const requestBody = newRow;
     try {
       const response = await fetch("http://localhost:3000/api/events/create", {
