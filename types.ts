@@ -75,7 +75,7 @@ export type PageContextType = {
 };
 
 export interface Option {
-  value: string;
+  value: any;
   label: string;
 }
 

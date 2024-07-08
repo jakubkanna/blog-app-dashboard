@@ -13,7 +13,6 @@ const ImagesModal: React.FC<ImagesModalProps> = ({
   const apiRef = useGridApiContext();
 
   useEffect(() => {
-    console.log(params);
     fetch(`http://localhost:3000/api/${fetchPath}/${params.id}/images`)
       .then((response) => {
         if (!response.ok) throw new Error("Failed to fetch selected images");

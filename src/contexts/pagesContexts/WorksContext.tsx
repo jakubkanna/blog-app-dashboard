@@ -9,7 +9,7 @@ export type Work = {
   medium?: string[];
   year?: number;
   images?: string[];
-  events?: string[];
+  events?: [];
   tags?: string[];
   public?: boolean;
 };
@@ -57,7 +57,10 @@ export const WorksProvider: React.FC<ProviderProps> = ({ children }) => {
   };
 
   const updateWork = async (newRow: Work): Promise<Work> => {
-    const requestBody = newRow;
+    const requestBody = { ...newRow };
+    const updatedEvents = newRow.events.map((event) => event._id);
+    requestBody.events = updatedEvents;
+
     try {
       const response = await fetch(
         `http://localhost:3000/api/works/update/${requestBody._id}`,

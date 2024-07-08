@@ -201,7 +201,7 @@ export default function EventForm() {
                   Images
                 </Typography>
                 <ImageSelectionPaper
-                  initVal={initImgs}
+                  defaultValue={initImgs}
                   onChange={handleImagesChange}
                 />
               </Grid>

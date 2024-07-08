@@ -5,13 +5,13 @@ import ImagesUploader from "./ImagesUploader";
 import { ImageInstance } from "../../types";
 
 interface ImageSelectionPaperProps {
-  initVal: ImageInstance[];
+  defaultValue: ImageInstance[];
   onChange: (value: ImageInstance[]) => void;
   onBlur?: (cb: () => void) => void;
 }
 
 const ImageSelectionPaper: React.FC<ImageSelectionPaperProps> = ({
-  initVal,
+  defaultValue,
   onChange,
   onBlur,
 }) => {
@@ -36,8 +36,8 @@ const ImageSelectionPaper: React.FC<ImageSelectionPaperProps> = ({
   };
 
   useEffect(() => {
-    setSelectedImgList(initVal);
-  }, [initVal]);
+    setSelectedImgList(defaultValue);
+  }, [defaultValue]);
 
   useEffect(() => {
     fetchAllImgs();
