@@ -1,43 +1,41 @@
 import { useState, useEffect } from "react";
 import { Modal, Box, Button } from "@mui/material";
-import ImagesSelectableList from "./ImagesSelectableList";
-import ImagesUploader from "./ImagesUploader";
 import { ImageInstance, ImagesModalProps } from "../../types";
+import ImageSelectionPaper from "./ImageSelectionPaper";
 import { useGridApiContext } from "@mui/x-data-grid";
 
-const ImagesModal: React.FC<ImagesModalProps> = ({ onClose, params }) => {
+const ImagesModal: React.FC<ImagesModalProps> = ({
+  onClose,
+  params,
+  fetchPath,
+}) => {
   const [selectedImgList, setSelectedImgList] = useState<ImageInstance[]>([]);
-  const [imgList, setImgList] = useState<ImageInstance[]>([]);
+  const apiRef = useGridApiContext();
 
   useEffect(() => {
-    fetch("http://localhost:3000/api/images")
+    console.log(params);
+    fetch(`http://localhost:3000/api/${fetchPath}/${params.id}/images`)
       .then((response) => {
-        if (!response.ok) throw new Error("Failed to fetch images");
+        if (!response.ok) throw new Error("Failed to fetch selected images");
         return response.json();
       })
-      .then((data: ImageInstance[]) => setImgList(data))
-      .catch((error) => console.error("Failed to fetch images", error));
-  }, []);
-
-  useEffect(() => {
-    if (params?.id) {
-      fetch(`http://localhost:3000/api/events/${params.id}/images`)
-        .then((response) => {
-          if (!response.ok) throw new Error("Failed to fetch selected images");
-          return response.json();
-        })
-        .then((data: ImageInstance[]) => setSelectedImgList(data))
-        .catch((error) =>
-          console.error("Failed to fetch selected images", error)
-        );
-    }
-  }, [params?.id]);
+      .then((data: ImageInstance[]) => setSelectedImgList(data))
+      .catch((error) =>
+        console.error("Failed to fetch selected images", error)
+      );
+  }, [params.id]);
 
   const handleSubmit = async () => {
-    const id = params.id;
-    const field = params.field;
-    const selectedImageIds = selectedImgList.map((image) => image._id);
     onClose();
+  };
+
+  const handleImagesChange = (value: ImageInstance[]) => {
+    const selectedImageIds = value.map((image) => image && image._id);
+    apiRef.current.setEditCellValue({
+      id: params.id,
+      field: params.field,
+      value: selectedImageIds,
+    });
   };
 
   return (
@@ -57,21 +55,11 @@ const ImagesModal: React.FC<ImagesModalProps> = ({ onClose, params }) => {
           overflowY: "auto",
         }}>
         <h1>{params?.row.title + " - " + params?.field.toUpperCase()}</h1>
-        <h2>Selected</h2>
-        <ImagesSelectableList
-          imageList={selectedImgList}
-          setImageList={setSelectedImgList}
+        <ImageSelectionPaper
+          initVal={selectedImgList}
+          onChange={handleImagesChange}
         />
-        <ImagesUploader setImageList={setSelectedImgList} />
-        <h2>Library</h2>
-        <ImagesSelectableList
-          imageList={imgList}
-          setImageList={setSelectedImgList}
-        />
-        <br />
-        <Button onClick={handleSubmit} variant="contained" color="primary">
-          Save
-        </Button>
+        <Button onClick={handleSubmit}>Save</Button>
       </Box>
     </Modal>
   );

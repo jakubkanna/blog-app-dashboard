@@ -14,7 +14,6 @@ import {
   Snackbar,
   Alert,
   Switch,
-  Button,
 } from "@mui/material";
 import { Event, ImageInstance } from "../../types";
 import CustomEditor from "./CustomEditor";
@@ -26,6 +25,7 @@ import dayjs from "dayjs";
 import { useEventsContext } from "../contexts/pagesContexts/EventsContext";
 import _ from "lodash";
 import { Form, useParams } from "react-router-dom";
+import LoadingButton from "@mui/lab/LoadingButton";
 
 interface Option {
   value: string;
@@ -37,13 +37,13 @@ export default function EventForm() {
   const [tags, setTags] = React.useState<Option[]>([]);
   const [formData, setFormData] = React.useState<Event | null>(null);
   const [initImgs, setInitImgs] = React.useState<ImageInstance[]>([]);
-  const [initData, setInitData] = React.useState<Event>();
   const { updateData } = useEventsContext();
   const [snackbar, setSnackbar] = React.useState<Pick<
     AlertProps,
     "children" | "severity"
   > | null>(null);
   let { id: eventId } = useParams();
+  const [loading, setLoading] = React.useState(true);
 
   // Fetching images and posts moved to respective components
 
@@ -51,8 +51,12 @@ export default function EventForm() {
     // Fetch formData
     fetch(`http://localhost:3000/api/events/${eventId}`)
       .then((response) => response.json())
-      .then((data: Event) => data && setInitData(data))
+      .then((data: Event) => {
+        data && setFormData(data);
+        setLoading(false);
+      })
       .catch((error) => console.error("Failed to fetch event ", error));
+
     // Fetch event images
     fetch(`http://localhost:3000/api/events/${eventId}/images`)
       .then((response) => response.json())
@@ -80,23 +84,18 @@ export default function EventForm() {
       .catch((error) => console.error("Failed to fetch tags:", error));
   }, []);
 
-  React.useEffect(() => {
-    if (!initData) return;
-    setFormData({ ...initData });
-  }, [initData]);
-
   // Handlers
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    setLoading(true);
     e.preventDefault();
-
-    if (!!formData && _.isEqual(formData, initData)) return;
     updateData(formData)
       .then(() => {
         setSnackbar({
           children: "Event successfully updated",
           severity: "success",
         });
+        setLoading(false);
       })
       .catch((error) => {
         console.error("Update error:", error);
@@ -104,6 +103,7 @@ export default function EventForm() {
           children: "Event update error",
           severity: "error",
         });
+        setLoading(false);
       });
   };
 
@@ -310,13 +310,13 @@ export default function EventForm() {
                     bottom: 0,
                     margin: "1rem",
                   }}>
-                  <Button
+                  <LoadingButton
+                    loading={loading}
                     type="submit"
                     variant="contained"
-                    color="primary"
                     size="large">
                     Save
-                  </Button>
+                  </LoadingButton>
                 </Grid>
               </Grid>
             </Grid>

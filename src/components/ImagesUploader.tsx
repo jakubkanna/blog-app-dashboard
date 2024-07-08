@@ -3,6 +3,7 @@ import DropZone from "./DropZone";
 import { Alert, AlertTitle, Button, CircularProgress } from "@mui/material";
 import { AuthContext } from "../contexts/AuthContext";
 import { Severity } from "../../types";
+import LoadingButton from "@mui/lab/LoadingButton";
 
 const ImagesUploader = ({ setImageList }) => {
   const [files, setFiles] = useState<File[]>([]);
@@ -81,15 +82,12 @@ const ImagesUploader = ({ setImageList }) => {
         </Alert>
       )}
       {files.length > 0 && (
-        <Button onClick={uploadImages} disabled={uploading}>
-          {uploading ? (
-            <>
-              <CircularProgress size={24} /> Uploading...
-            </>
-          ) : (
-            "Upload"
-          )}
-        </Button>
+        <LoadingButton
+          loading={uploading}
+          onClick={uploadImages}
+          disabled={uploading}>
+          Upload
+        </LoadingButton>
       )}
     </>
   );

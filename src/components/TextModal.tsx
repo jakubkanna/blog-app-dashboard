@@ -16,7 +16,6 @@ const EditorModal: React.FC<EditorModalProps> = ({ params, onClose }) => {
   const handleEditorSubmit = async () => {
     const id = params.id;
     const field = params.field;
-    console.log(id, field, editorContent);
     apiRef.current.setEditCellValue({ id, field, value: editorContent });
     onClose();
   };

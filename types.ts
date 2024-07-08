@@ -37,8 +37,8 @@ export type ProviderProps = {
 };
 
 export interface ImagesModalProps {
-  open: boolean;
-  handleClose: () => void;
+  open?: boolean;
+  onSubmit?: (selectedImages: string[]) => void;
   params: {
     id: string;
     row: {
@@ -46,8 +46,8 @@ export interface ImagesModalProps {
     };
     field: string;
   };
-  initialValue: ImageInstance[];
-  onSubmit: (selectedImages: string[]) => void;
+  onClose: () => void;
+  fetchPath: "events" | "works";
 }
 
 export type Event = Partial<{

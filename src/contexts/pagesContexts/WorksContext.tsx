@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { AuthContext } from "../AuthContext";
-import { ProviderProps } from "../../../types";
+import { PageContextType, ProviderProps } from "../../../types";
 
 export type Work = {
   _id: string;
@@ -14,15 +14,7 @@ export type Work = {
   public?: boolean;
 };
 
-type WorksContextType = {
-  data: Work[];
-  updateData: (newRow: Work) => Promise<Work>;
-  createData: (newRow: Work) => Promise<Work>;
-  deleteData: (workId: string) => void;
-  loading: boolean;
-};
-
-const WorksContext = createContext<WorksContextType | undefined>(undefined);
+const WorksContext = createContext<PageContextType | undefined>(undefined);
 
 export const useWorksContext = () => {
   const context = useContext(WorksContext);
@@ -53,8 +45,6 @@ export const WorksProvider: React.FC<ProviderProps> = ({ children }) => {
         events: work.events,
         tags: work.tags,
         public: work.public,
-        timestamp: new Date(work.timestamp),
-        modified: work.modified ? new Date(work.modified) : undefined,
       }));
 
       setWorks(fetchedWorks);
@@ -68,13 +58,9 @@ export const WorksProvider: React.FC<ProviderProps> = ({ children }) => {
 
   const updateWork = async (newRow: Work): Promise<Work> => {
     const requestBody = newRow;
-    const workId = requestBody.id;
-
-    console.log("req.body, updateWork:", requestBody);
-
     try {
       const response = await fetch(
-        `http://localhost:3000/api/works/update/${workId}`,
+        `http://localhost:3000/api/works/update/${requestBody._id}`,
         {
           method: "POST",
           headers: {
