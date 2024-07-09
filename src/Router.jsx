@@ -24,9 +24,8 @@ import Images from "./pages/Images";
 import EventForm from "./components/EventForm";
 
 const ProtectedAdmin = () => {
-  const { isAdmin, isLoading } = usePermissions();
-  isLoading && <div>Loading...</div>;
-  return isAdmin ? <Outlet /> : <Login />;
+  const { isLoggedIn } = usePermissions();
+  return isLoggedIn ? <Outlet /> : <Login />;
 };
 
 const EditorWithContext = () => {
@@ -66,15 +65,15 @@ const routes = [
             children: [{ path: "images", element: <Images />, name: "Images" }],
           },
           {
-            element: <PageContainer title="Works" />,
+            element: (
+              <WorksProvider>
+                <PageContainer title="Works" />
+              </WorksProvider>
+            ),
             children: [
               {
                 path: "works",
-                element: (
-                  <WorksProvider>
-                    <Works />
-                  </WorksProvider>
-                ),
+                element: <Works />,
                 name: "Works",
               },
             ],
@@ -90,11 +89,7 @@ const routes = [
             children: [
               {
                 path: "",
-                element: (
-                  <EventsProvider>
-                    <Events />
-                  </EventsProvider>
-                ),
+                element: <Events />,
               },
               {
                 path: "update/:id",
@@ -105,16 +100,17 @@ const routes = [
           },
           {
             path: "posts",
-            element: <PageContainer title="Posts" />,
+            element: (
+              <PostsProvider>
+                <PageContainer title="Posts" />{" "}
+              </PostsProvider>
+            ),
+
             name: "Posts",
             children: [
               {
                 path: "",
-                element: (
-                  <PostsProvider>
-                    <Posts />
-                  </PostsProvider>
-                ),
+                element: <Posts />,
               },
               {
                 path: "create",

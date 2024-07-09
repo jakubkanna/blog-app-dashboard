@@ -9,13 +9,13 @@ const initialAuthContext: AuthContextType = {
   setUser: () => {},
 };
 
-// Create context
-export const AuthContext = createContext<AuthContextType>(initialAuthContext);
-
-// Define props for AuthProvider
+//  props for AuthProvider
 interface AuthProviderProps {
   children: ReactNode;
 }
+
+// Create context
+export const AuthContext = createContext<AuthContextType>(initialAuthContext);
 
 // AuthProvider component
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {

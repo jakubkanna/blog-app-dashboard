@@ -7,17 +7,15 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 
 export default function Login() {
-  const { isLoggedIn, isAdmin } = usePermissions();
+  const { isLoggedIn } = usePermissions();
 
   const navigate = useNavigate();
 
   useEffect(() => {
     if (isLoggedIn) {
-      if (isAdmin) {
-        navigate("/admin/dashboard");
-      }
+      navigate("/admin/dashboard");
     }
-  }, [isLoggedIn, isAdmin, navigate]);
+  }, [isLoggedIn, navigate]);
 
   return (
     <>

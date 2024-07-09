@@ -6,11 +6,9 @@ const usePermissions = () => {
 
   if (!user) return false;
 
-  const isAdmin = user && user.role === "admin";
-
   const isLoggedIn = !!user;
 
-  return { isLoggedIn, isAdmin };
+  return { isLoggedIn };
 };
 
 export default usePermissions;
