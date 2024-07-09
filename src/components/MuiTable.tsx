@@ -190,7 +190,6 @@ export default function MuiTable({ columns, context }: MuiTableProps) {
       field: "actions",
       type: "actions",
       headerName: "Actions",
-      flex: 1,
       getActions: ({ id }: { id: GridRowId }) => {
         const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
 

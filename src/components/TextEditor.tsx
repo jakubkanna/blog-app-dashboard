@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { Editor } from "@tinymce/tinymce-react";
 
-interface CustomEditorProps {
+interface TextEditorProps {
   id: string;
   initialValue?: string;
   onBlur?: (content: string) => void;
 }
 
-const CustomEditor: React.FC<CustomEditorProps> = ({
+const TextEditor: React.FC<TextEditorProps> = ({
   id,
   initialValue = "",
   onBlur,
@@ -61,4 +61,4 @@ const CustomEditor: React.FC<CustomEditorProps> = ({
   );
 };
 
-export default CustomEditor;
+export default TextEditor;

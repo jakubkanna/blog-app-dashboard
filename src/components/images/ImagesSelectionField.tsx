@@ -2,20 +2,20 @@ import React, { useState, useEffect, useRef } from "react";
 import { Box, Paper, InputLabel } from "@mui/material";
 import ImagesSelectableList from "./ImagesSelectableList";
 import ImagesUploader from "./ImagesUploader";
-import { ImageInstance } from "../../types";
+import { ImageInstance } from "../../../types";
 
 interface ImageSelectionPaperProps {
-  defaultValue: ImageInstance[];
+  initVal: ImageInstance[];
   onChange: (value: ImageInstance[]) => void;
   onBlur?: (cb: () => void) => void;
 }
 
-const ImageSelectionPaper: React.FC<ImageSelectionPaperProps> = ({
-  defaultValue,
+const ImagesSelectionPaper: React.FC<ImageSelectionPaperProps> = ({
+  initVal,
   onChange,
-  onBlur,
 }) => {
-  const [selectedImgList, setSelectedImgList] = useState<ImageInstance[]>([]);
+  const [selectedImgList, setSelectedImgList] =
+    useState<ImageInstance[]>(initVal);
   const [images, setImages] = useState<ImageInstance[]>([]);
   const [isActive, setIsActive] = useState(false);
   const paperRef = useRef<HTMLDivElement>(null);
@@ -34,10 +34,6 @@ const ImageSelectionPaper: React.FC<ImageSelectionPaperProps> = ({
       console.error("Failed to fetch event images", error);
     }
   };
-
-  useEffect(() => {
-    setSelectedImgList(defaultValue);
-  }, [defaultValue]);
 
   useEffect(() => {
     fetchAllImgs();
@@ -64,15 +60,7 @@ const ImageSelectionPaper: React.FC<ImageSelectionPaperProps> = ({
   useEffect(() => {
     onChange(selectedImgList);
   }, [selectedImgList]);
-  //on blur
-  useEffect(() => {
-    if (!isActive && onBlur) {
-      onBlur(() => {
-        // Define any specific logic for onBlur callback if needed
-        console.log("Blur callback executed");
-      });
-    }
-  }, [isActive, onBlur]);
+
   return (
     <Paper
       ref={paperRef}
@@ -105,4 +93,4 @@ const ImageSelectionPaper: React.FC<ImageSelectionPaperProps> = ({
   );
 };
 
-export default ImageSelectionPaper;
+export default ImagesSelectionPaper;

@@ -59,12 +59,24 @@ export type Event = Partial<{
   start_date: Date;
   end_date: Date;
   venue: string;
-  tags: string[];
-  images: string[];
-  post: string | null;
+  images?: ImageInstance[];
+  tags?: string[];
+  post?: { title: string; _id: string };
   external_url: URL;
   public: boolean;
 }>;
+
+export type Work = {
+  _id: string;
+  id: string;
+  title: string;
+  medium?: string[];
+  year?: number;
+  events?: any[];
+  images?: any[];
+  tags?: any[];
+  public?: boolean;
+};
 
 export type PageContextType = {
   data: any[];
@@ -75,8 +87,8 @@ export type PageContextType = {
 };
 
 export interface Option {
-  value: any;
-  label: string;
+  value?: any;
+  label?: string;
 }
 
 export interface SelectProps {

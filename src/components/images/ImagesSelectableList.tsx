@@ -1,7 +1,7 @@
 import React from "react";
 import { Grid, Box, Typography, Button } from "@mui/material";
-import { ImageInstance } from "../../types";
-import useImageUrl from "../hooks/useImageURL";
+import { ImageInstance } from "../../../types";
+import useImageUrl from "../../hooks/useImageURL";
 import { randomId } from "@mui/x-data-grid-generator";
 
 interface ImagesSelectableListProps {

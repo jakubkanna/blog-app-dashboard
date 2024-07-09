@@ -27,7 +27,6 @@ export default function Events() {
     {
       field: "public",
       headerName: "Public",
-      flex: 1,
       editable: true,
       type: "boolean",
     },

@@ -3,9 +3,10 @@ import MuiTable from "../components/MuiTable";
 import { useWorksContext } from "../contexts/pagesContexts/WorksContext";
 import { Button } from "@mui/material";
 import { GridColDef, useGridApiContext } from "@mui/x-data-grid";
-import { Event, Option } from "../../types";
+import { Event, ImageInstance, Option } from "../../types";
 import MuiTableCellModal from "../components/MuiTableCellModal";
-import AutoCompleteField from "../components/AutoCompleteField";
+import InputAutocompleteField from "../components/InputAutoCompleteField";
+import ImagesSelectionPaper from "../components/images/ImagesSelectionField";
 
 export default function Works() {
   const [editing, setEditing] = useState<{
@@ -30,6 +31,20 @@ export default function Works() {
     }
   };
 
+  const fetchTags = async (): Promise<Option[]> => {
+    try {
+      const response = await fetch("http://localhost:3000/api/tags/");
+      const data = await response.json();
+      return data.map((tag: string) => ({
+        label: tag,
+        value: tag,
+      }));
+    } catch (error) {
+      console.error("Failed to fetch tags:", error);
+      return [];
+    }
+  };
+
   const ModalCell = ({ params }: { params: any }) => {
     const id = params.id;
     const field = params.field;
@@ -40,8 +55,6 @@ export default function Works() {
         ? value.map((item) => item.value)
         : [value?.value];
 
-      console.log("retrivedValue", retrivedValue);
-
       apiRef.current.setEditCellValue({
         id: id,
         field: field,
@@ -49,11 +62,19 @@ export default function Works() {
       });
     };
 
+    const handleImagesChange = (images: ImageInstance[]) => {
+      apiRef.current.setEditCellValue({
+        id: id,
+        field: field,
+        value: images,
+      });
+    };
+
     const handleEditClick = () => {
       switch (field) {
         case "events":
           setModalBody(
-            <AutoCompleteField
+            <InputAutocompleteField
               fetchOptions={fetchEvents}
               initVal={params.row.events.map((event: Event) => ({
                 label: event.title,
@@ -62,7 +83,31 @@ export default function Works() {
               id={"events"}
               label={"Events"}
               multiple={true}
-              onBlur={(value) => handleCellChange(value)}
+              onChange={(value) => handleCellChange(value)}
+            />
+          );
+          break;
+        case "tags":
+          setModalBody(
+            <InputAutocompleteField
+              fetchOptions={fetchTags}
+              initVal={params.row.tags.map((tag: string) => ({
+                label: tag,
+                value: tag,
+              }))}
+              id={"tags"}
+              label={"Tags"}
+              onChange={(value) => handleCellChange(value)}
+              multiple
+              freeSolo
+            />
+          );
+          break;
+        case "images":
+          setModalBody(
+            <ImagesSelectionPaper
+              initVal={params.row.images}
+              onChange={(value) => handleImagesChange(value)}
             />
           );
           break;
@@ -85,36 +130,47 @@ export default function Works() {
   const workColumns: GridColDef[] = [
     { field: "title", headerName: "Title", flex: 1, editable: true },
     { field: "medium", headerName: "Medium", flex: 1, editable: true },
-    { field: "year", headerName: "Year", flex: 1, editable: true },
+    {
+      field: "year",
+      headerName: "Year",
+      editable: true,
+      type: "number",
+      valueFormatter: (value) => value,
+    },
     {
       field: "images",
       headerName: "Images",
       flex: 1,
       editable: true,
       renderEditCell: (params: any) => <ModalCell params={params} />,
+      valueFormatter: (value: any) => {
+        const imageCount = value.length;
+        if (imageCount) return `${imageCount} images selected`;
+      },
     },
-    { field: "tags", headerName: "Tags", flex: 1, editable: true },
+    {
+      field: "tags",
+      headerName: "Tags",
+      flex: 1,
+      editable: true,
+      renderEditCell: (params: any) => <ModalCell params={params} />,
+      valueFormatter: (value: any) => {
+        return value.map((tag: string) => tag).join(", ");
+      },
+    },
     {
       field: "events",
       headerName: "Events",
       flex: 1,
       editable: true,
       renderEditCell: (params: any) => <ModalCell params={params} />,
-      renderCell: (params) => (
-        <span>
-          {params.row.events.map((event: Event, index: number) => (
-            <React.Fragment key={event.id}>
-              {event.title}
-              {index < params.row.events.length - 1 && ", "}
-            </React.Fragment>
-          ))}
-        </span>
-      ),
+      valueFormatter: (value: any) => {
+        return value.map((event: Event) => event.title).join(", ");
+      },
     },
     {
       field: "public",
       headerName: "Public",
-      flex: 1,
       editable: true,
       type: "boolean",
     },
@@ -125,7 +181,7 @@ export default function Works() {
       <MuiTable columns={workColumns} context={useWorksContext} />
       <MuiTableCellModal
         open={!!editing}
-        title={editing?.field}
+        title={editing?.row.title + " - " + editing?.field}
         onClose={handleClose}>
         {modalBody}
       </MuiTableCellModal>

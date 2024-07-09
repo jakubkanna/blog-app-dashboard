@@ -1,33 +1,35 @@
+// problems remove item, lack of focus on click delete button
+
 import * as React from "react";
 import TextField from "@mui/material/TextField";
-import Autocomplete from "@mui/material/Autocomplete";
+import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
 import CircularProgress from "@mui/material/CircularProgress";
 import { Option } from "../../types";
+import _ from "lodash";
 
-interface AutoCompleteFieldProps {
+interface InputAutocompleteFieldProps {
   id: string;
   label: string;
-  multiple: boolean;
+  multiple?: boolean;
+  freeSolo?: boolean;
   fetchOptions: () => Promise<Option[]>;
-  onBlur: (value: Option | Option[] | undefined) => void;
-  initVal?: Option | Option[];
+  onChange: (value: Option | Option[]) => void;
+  initVal: Option | Option[];
 }
 
-const AutoCompleteField: React.FC<AutoCompleteFieldProps> = ({
+const InputAutocompleteField: React.FC<InputAutocompleteFieldProps> = ({
   id,
   label,
   multiple,
+  freeSolo,
   fetchOptions,
-  onBlur,
+  onChange,
   initVal,
 }) => {
   const [open, setOpen] = React.useState(false);
   const [options, setOptions] = React.useState<Option[]>([]);
   const loading = open && options.length === 0;
-  const [value, setValue] = React.useState<Option | Option[] | undefined>(
-    multiple ? [] : undefined
-  );
-  React.useEffect(() => setValue(initVal), [initVal]);
+  const [value, setValue] = React.useState<Option | Option[]>(initVal);
 
   React.useEffect(() => {
     let active = true;
@@ -53,10 +55,12 @@ const AutoCompleteField: React.FC<AutoCompleteFieldProps> = ({
       setOptions([]);
     }
   }, [open]);
+  const filter = createFilterOptions<Option>();
 
   return (
     <Autocomplete
       multiple={multiple}
+      freeSolo={freeSolo}
       id={id + "-autocomplete-field"}
       sx={{ width: 300 }}
       open={open}
@@ -69,12 +73,30 @@ const AutoCompleteField: React.FC<AutoCompleteFieldProps> = ({
       value={value}
       onChange={(_event, newValue: any) => {
         setValue(newValue);
+        onChange(newValue);
       }}
-      onBlur={() => onBlur(value)}
       isOptionEqualToValue={(option, value) => option.label === value.label}
       getOptionLabel={(option) => option.label}
       options={options}
       loading={loading}
+      filterOptions={(options, params) => {
+        const filtered = filter(options, params);
+        const { inputValue } = params;
+        // Suggest the creation of a new value
+        const isExisting = options.some(
+          (option) => inputValue === option.label
+        );
+        if (inputValue !== "" && !isExisting) {
+          filtered.push({
+            value: inputValue,
+            label: inputValue,
+          });
+        }
+
+        return filtered;
+      }}
+      selectOnFocus
+      autoSelect
       renderInput={(params) => (
         <TextField
           {...params}
@@ -96,4 +118,4 @@ const AutoCompleteField: React.FC<AutoCompleteFieldProps> = ({
   );
 };
 
-export default AutoCompleteField;
+export default InputAutocompleteField;

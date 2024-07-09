@@ -3,8 +3,8 @@ import { AuthContext } from "../AuthContext";
 import { ProviderProps } from "../../../types";
 
 export type Post = {
-  id: string;
   _id: string;
+  id: string;
   author: string;
   timestamp: Date;
   title: string;

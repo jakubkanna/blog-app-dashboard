@@ -1,8 +1,8 @@
 import { useContext, useState } from "react";
-import DropZone from "./DropZone";
-import { Alert, AlertTitle, Button, CircularProgress } from "@mui/material";
-import { AuthContext } from "../contexts/AuthContext";
-import { Severity } from "../../types";
+import DropZone from "../DropZone";
+import { Alert, AlertTitle } from "@mui/material";
+import { AuthContext } from "../../contexts/AuthContext";
+import { Severity } from "../../../types";
 import LoadingButton from "@mui/lab/LoadingButton";
 
 const ImagesUploader = ({ setImageList }) => {

@@ -1,18 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { AuthContext } from "../AuthContext";
-import { PageContextType, ProviderProps } from "../../../types";
-
-export type Work = {
-  _id: string;
-  id: string;
-  title: string;
-  medium?: string[];
-  year?: number;
-  images?: string[];
-  events?: [];
-  tags?: string[];
-  public?: boolean;
-};
+import { PageContextType, ProviderProps, Work } from "../../../types";
 
 const WorksContext = createContext<PageContextType | undefined>(undefined);
 
@@ -57,9 +45,7 @@ export const WorksProvider: React.FC<ProviderProps> = ({ children }) => {
   };
 
   const updateWork = async (newRow: Work): Promise<Work> => {
-    const requestBody = { ...newRow };
-    const updatedEvents = newRow.events.map((event) => event._id);
-    requestBody.events = updatedEvents;
+    const requestBody = newRow;
 
     try {
       const response = await fetch(

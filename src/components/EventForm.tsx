@@ -6,18 +6,14 @@ import {
   Grid,
   Typography,
   InputLabel,
-  FormControl,
-  Select,
-  MenuItem,
-  Autocomplete,
   AlertProps,
   Snackbar,
   Alert,
   Switch,
 } from "@mui/material";
-import { Event, ImageInstance } from "../../types";
-import CustomEditor from "./CustomEditor";
-import ImageSelectionPaper from "./ImageSelectionPaper";
+import { Event, ImageInstance, Option } from "../../types";
+import TextEditor from "./TextEditor";
+import ImagesSelectionPaper from "./images/ImagesSelectionField";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -26,17 +22,11 @@ import { useEventsContext } from "../contexts/pagesContexts/EventsContext";
 import _ from "lodash";
 import { Form, useParams } from "react-router-dom";
 import LoadingButton from "@mui/lab/LoadingButton";
-
-interface Option {
-  value: string;
-  label: string;
-}
+import InputAutocompleteField from "./InputAutoCompleteField";
+import { Post } from "../contexts/pagesContexts/PostsContext";
 
 export default function EventForm() {
-  const [posts, setPosts] = React.useState<Option[]>([]);
-  const [tags, setTags] = React.useState<Option[]>([]);
   const [formData, setFormData] = React.useState<Event | null>(null);
-  const [initImgs, setInitImgs] = React.useState<ImageInstance[]>([]);
   const { updateData } = useEventsContext();
   const [snackbar, setSnackbar] = React.useState<Pick<
     AlertProps,
@@ -45,44 +35,56 @@ export default function EventForm() {
   let { id: eventId } = useParams();
   const [loading, setLoading] = React.useState(true);
 
-  // Fetching images and posts moved to respective components
+  // Fetchers
 
   React.useEffect(() => {
     // Fetch formData
-    fetch(`http://localhost:3000/api/events/${eventId}`)
-      .then((response) => response.json())
-      .then((data: Event) => {
-        data && setFormData(data);
-        setLoading(false);
-      })
-      .catch((error) => console.error("Failed to fetch event ", error));
-
-    // Fetch event images
-    fetch(`http://localhost:3000/api/events/${eventId}/images`)
-      .then((response) => response.json())
-      .then((data: ImageInstance[]) => data.length && setInitImgs(data))
-      .catch((error) => console.error("Failed to fetch event images", error));
-    // Fetch posts
-    fetch("http://localhost:3000/api/posts/")
-      .then((response) => response.json())
-      .then((postsData) => {
-        const formattedPosts = postsData.map(
-          (post: { title: string; _id: string }) => ({
-            label: post.title,
-            value: post._id,
-          })
+    (async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:3000/api/events/${eventId}`
         );
-        setPosts([{ label: "-", value: "" }, ...formattedPosts]);
-      })
-      .catch((error) => console.error("Failed to fetch posts:", error));
-    // Fetch tags
-    fetch("http://localhost:3000/api/tags/")
-      .then((response) => response.json())
-      .then((tagsData) =>
-        setTags(tagsData.map((tag: string) => ({ label: tag, value: tag })))
-      )
-      .catch((error) => console.error("Failed to fetch tags:", error));
+        const data = await response.json();
+        if (response.ok) {
+          setFormData(data);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Failed to fetch tags:", error);
+        return [];
+      }
+    })();
   }, []);
+
+  //async
+
+  const fetchTags = async (): Promise<Option[]> => {
+    try {
+      const response = await fetch("http://localhost:3000/api/tags/");
+      const data = await response.json();
+      return data.map((tag: string) => ({
+        label: tag,
+        value: tag,
+      }));
+    } catch (error) {
+      console.error("Failed to fetch tags:", error);
+      return [];
+    }
+  };
+
+  const fetchPosts = async (): Promise<Option[]> => {
+    try {
+      const response = await fetch("http://localhost:3000/api/posts/");
+      const data = await response.json();
+      return data.map((post: Post) => ({
+        label: post.title,
+        value: post._id,
+      }));
+    } catch (error) {
+      console.error("Failed to fetch posts:", error);
+      return [];
+    }
+  };
 
   // Handlers
 
@@ -115,6 +117,16 @@ export default function EventForm() {
     }));
   };
 
+  const handlePostsChange = (value: Option | Option[]) => {
+    const retrivedValue = Array.isArray(value)
+      ? value.map((item) => item.value)
+      : value.value;
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      post: retrivedValue,
+    }));
+  };
+
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
     setFormData((prevFormData) => {
@@ -122,10 +134,14 @@ export default function EventForm() {
     });
   };
 
-  const handleTagsChange = (_event: React.SyntheticEvent, value: any) => {
+  const handleTagsChange = (value: Option | Option[]) => {
+    const retrivedValue = Array.isArray(value)
+      ? value.map((item) => item.value)
+      : [];
+
     setFormData((prevFormData) => ({
       ...prevFormData,
-      tags: value,
+      tags: retrivedValue,
     }));
   };
 
@@ -146,7 +162,7 @@ export default function EventForm() {
   const handleImagesChange = (value: ImageInstance[]) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
-      images: value.map((img) => img._id),
+      images: value,
     }));
   };
 
@@ -180,7 +196,7 @@ export default function EventForm() {
                 <InputLabel htmlFor="subtitle" shrink>
                   Subtitle
                 </InputLabel>
-                <CustomEditor
+                <TextEditor
                   id="subtitle"
                   initialValue={formData.subtitle}
                   onBlur={handleInputChange}
@@ -190,7 +206,7 @@ export default function EventForm() {
                 <InputLabel htmlFor="description" shrink>
                   Description
                 </InputLabel>
-                <CustomEditor
+                <TextEditor
                   id="description"
                   initialValue={formData.description}
                   onBlur={handleInputChange}
@@ -200,8 +216,8 @@ export default function EventForm() {
                 <Typography variant="h6" gutterBottom>
                   Images
                 </Typography>
-                <ImageSelectionPaper
-                  defaultValue={initImgs}
+                <ImagesSelectionPaper
+                  initVal={formData.images || []}
                   onChange={handleImagesChange}
                 />
               </Grid>
@@ -260,34 +276,33 @@ export default function EventForm() {
                 />
               </Grid>
               <Grid item xs={12}>
-                <FormControl fullWidth>
-                  <InputLabel id="simple-select-label">Post</InputLabel>
-                  <Select
-                    labelId="simple-select-label"
-                    id="simple-select"
-                    name="post"
-                    label="Post"
-                    value={formData.post ?? ""}
-                    onChange={handleInputChange}>
-                    {posts.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                <InputAutocompleteField
+                  fetchOptions={fetchPosts}
+                  initVal={
+                    {
+                      label: formData.post?.title,
+                      value: formData.post?._id,
+                    } || { label: "", value: "" }
+                  }
+                  id={"posts"}
+                  label={"Posts"}
+                  onChange={handlePostsChange}
+                />
               </Grid>
               <Grid item xs={12}>
-                <Autocomplete
+                <InputAutocompleteField
+                  fetchOptions={fetchTags}
+                  initVal={
+                    formData.tags?.map((tag: string) => ({
+                      label: tag,
+                      value: tag,
+                    })) || []
+                  }
+                  id={"tags"}
+                  label={"Tags"}
+                  onChange={(value) => handleTagsChange(value)}
                   multiple
-                  id="tags-filled"
-                  options={tags.map((option) => option.label)}
-                  value={formData.tags}
-                  onChange={handleTagsChange}
                   freeSolo
-                  renderInput={(params) => (
-                    <TextField {...params} label="Tags" placeholder="Tags" />
-                  )}
                 />
               </Grid>
               <Grid item xs={12}>

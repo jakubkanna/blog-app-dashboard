@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Modal, Box, Button } from "@mui/material";
-import { ImageInstance, ImagesModalProps } from "../../types";
-import ImageSelectionPaper from "./ImageSelectionPaper";
+import { ImageInstance, ImagesModalProps } from "../../../types";
+import ImagesSelectionPaper from "./ImagesSelectionField";
 import { useGridApiContext } from "@mui/x-data-grid";
 
 const ImagesModal: React.FC<ImagesModalProps> = ({
@@ -54,7 +54,7 @@ const ImagesModal: React.FC<ImagesModalProps> = ({
           overflowY: "auto",
         }}>
         <h1>{params?.row.title + " - " + params?.field.toUpperCase()}</h1>
-        <ImageSelectionPaper
+        <ImagesSelectionPaper
           initVal={selectedImgList}
           onChange={handleImagesChange}
         />
