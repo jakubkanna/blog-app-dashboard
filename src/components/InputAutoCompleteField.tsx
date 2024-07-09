@@ -59,10 +59,14 @@ const InputAutocompleteField: React.FC<InputAutocompleteFieldProps> = ({
 
   return (
     <Autocomplete
+      options={options}
+      loading={loading}
       multiple={multiple}
       freeSolo={freeSolo}
+      selectOnFocus
+      autoSelect
+      fullWidth
       id={id + "-autocomplete-field"}
-      sx={{ width: 300 }}
       open={open}
       onOpen={() => {
         setOpen(true);
@@ -77,8 +81,6 @@ const InputAutocompleteField: React.FC<InputAutocompleteFieldProps> = ({
       }}
       isOptionEqualToValue={(option, value) => option.label === value.label}
       getOptionLabel={(option) => option.label}
-      options={options}
-      loading={loading}
       filterOptions={(options, params) => {
         const filtered = filter(options, params);
         const { inputValue } = params;
@@ -95,8 +97,6 @@ const InputAutocompleteField: React.FC<InputAutocompleteFieldProps> = ({
 
         return filtered;
       }}
-      selectOnFocus
-      autoSelect
       renderInput={(params) => (
         <TextField
           {...params}

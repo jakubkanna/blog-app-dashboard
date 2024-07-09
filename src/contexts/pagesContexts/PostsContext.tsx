@@ -1,19 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { AuthContext } from "../AuthContext";
-import { ProviderProps } from "../../../types";
-
-export type Post = {
-  _id: string;
-  id: string;
-  author: string;
-  timestamp: Date;
-  title: string;
-  data?: string;
-  public: boolean;
-  slug: string;
-  modified?: Date;
-  tags: string[];
-};
+import { Post, ProviderProps } from "../../../types";
 
 type PostsContextType = {
   data: Post[];
@@ -42,15 +29,23 @@ export const PostsProvider: React.FC<ProviderProps> = ({ children }) => {
     setLoading(true);
     try {
       const response = await fetch("http://localhost:3000/api/posts/");
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch posts");
+      }
       const postData = await response.json();
 
-      const fetchedPosts: Post[] = postData.map((post: any) => ({
-        id: post._id,
+      // Check if postData is an array and not empty
+      if (!Array.isArray(postData) || postData.length === 0) {
+        setPosts([]); // Set empty array if no posts are returned
+        return; // Exit early if no posts are present
+      }
+      const fetchedPosts: Post[] = postData.map((post: Post) => ({
         _id: post._id,
         author: post.author,
         timestamp: new Date(post.timestamp),
         title: post.title,
-        data: post.data,
+        content: post.content,
         public: post.public,
         slug: post.slug,
         modified: post.modified ? new Date(post.modified) : undefined,
@@ -67,10 +62,7 @@ export const PostsProvider: React.FC<ProviderProps> = ({ children }) => {
   };
 
   const updatePost = async (newRow: Post): Promise<Post> => {
-    const requestBody = {
-      ...newRow,
-      data: newRow.data === "" ? null : newRow.data,
-    };
+    const requestBody = newRow;
 
     const postId = requestBody._id;
 
@@ -81,7 +73,7 @@ export const PostsProvider: React.FC<ProviderProps> = ({ children }) => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `${token}`,
           },
           body: JSON.stringify(requestBody),
         }
@@ -108,17 +100,13 @@ export const PostsProvider: React.FC<ProviderProps> = ({ children }) => {
   };
 
   const createPost = async (newRow: Post): Promise<Post> => {
-    const requestBody = {
-      ...newRow,
-      data: newRow.data === "" ? null : newRow.data,
-    };
-
+    const requestBody = newRow;
     try {
       const response = await fetch("http://localhost:3000/api/posts/create", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `${token}`,
         },
         body: JSON.stringify(requestBody),
       });
@@ -130,7 +118,7 @@ export const PostsProvider: React.FC<ProviderProps> = ({ children }) => {
 
       const createdPost: Post = await response.json();
 
-      setPosts((prevPosts) => [...prevPosts, createdPost]);
+      setPosts((prevPosts) => [createdPost, ...prevPosts]);
 
       return createdPost;
     } catch (error) {
@@ -147,7 +135,7 @@ export const PostsProvider: React.FC<ProviderProps> = ({ children }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `${token}`,
         },
         body: JSON.stringify({}),
       });
@@ -157,9 +145,8 @@ export const PostsProvider: React.FC<ProviderProps> = ({ children }) => {
         throw new Error(errorData.message || "Failed to delete post");
       }
 
-      // Update local posts state by filtering out the deleted post
       const updatedPosts = posts.filter((post) => post._id !== postId);
-      setPosts(updatedPosts); // Update local state
+      setPosts(updatedPosts);
     } catch (error) {
       console.error(error);
       throw error;

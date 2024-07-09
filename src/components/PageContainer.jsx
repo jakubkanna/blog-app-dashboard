@@ -1,20 +1,19 @@
 import { Outlet, useParams } from "react-router-dom";
+import { Container, Typography } from "@mui/material";
 
 const PageContainer = ({ title }) => {
   const { id } = useParams();
 
   return (
-    <>
-      <div className="container">
-        <div className="container-header">
-          <h1>{title.replace(":id", id || "")}</h1>
-        </div>
-        <div className="container-body">
-          <Outlet />
-        </div>
-        <div className="container-footer"></div>
+    <Container maxWidth="100%">
+      <div style={{ marginBottom: "20px" }}>
+        <Typography variant="h4">{title.replace(":id", id || "")}</Typography>
       </div>
-    </>
+      <div style={{ minHeight: "300px" }}>
+        <Outlet />
+      </div>
+      {/* You can add a footer here if needed */}
+    </Container>
   );
 };
 

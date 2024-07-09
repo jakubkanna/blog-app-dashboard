@@ -74,9 +74,6 @@ const LoginForm = () => {
           placeholder="Password"
         />
         <Button type="submit">Login</Button>
-        <p>
-          <Link to="/">Reset password</Link>
-        </p>
       </form>
       <Snackbar
         open={snackbarOpen}

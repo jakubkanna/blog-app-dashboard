@@ -1,6 +1,6 @@
 import "../styles/Images.scss";
 import ImagesUploader from "../components/images/ImagesUploader";
-import ImagesLibrary from "../components/ImagesLibrary";
+import ImagesLibrary from "../components/images/ImagesLibrary";
 import { ImageInstance } from "../../types";
 import { useState } from "react";
 

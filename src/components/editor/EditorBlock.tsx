@@ -3,10 +3,9 @@ import EditorBlockText from "./EditorBlockText";
 import EditorBlockImage from "./EditorBlockImage";
 import { Delete } from "lucide-react";
 import { Button } from "@mui/material";
+import TextEditor from "../TextEditor";
 
-const EditorBlock = memo(function EditorBlock({ props }) {
-  // memo to re render only on param change
-
+const EditorBlock = function EditorBlock({ props }) {
   const {
     index,
     totalBlocks,
@@ -65,19 +64,11 @@ const EditorBlock = memo(function EditorBlock({ props }) {
   return (
     <div className={`editor-block-${blockData.type}-${blockData.id}`}>
       <Input />
-      {blockData.type === "image" ? (
-        <EditorBlockImage />
-      ) : (
-        <EditorBlockText
-          blockIndex={index}
-          id={blockData.id}
-          type={blockData.type}
-          blockContent={blockData.content}
-          updateBlockData={updateBlockData}
-        />
+      {blockData.type === "image" ? null : (
+        <TextEditor id={`text-editor-${blockData.id}`} initVal onBlur />
       )}
     </div>
   );
-});
+};
 
 export default EditorBlock;

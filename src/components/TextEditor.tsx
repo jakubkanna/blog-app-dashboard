@@ -3,16 +3,16 @@ import { Editor } from "@tinymce/tinymce-react";
 
 interface TextEditorProps {
   id: string;
-  initialValue?: string;
+  initVal?: string;
   onBlur?: (content: string) => void;
 }
 
 const TextEditor: React.FC<TextEditorProps> = ({
   id,
-  initialValue = "",
+  initVal = "",
   onBlur,
 }) => {
-  const [editorContent, setEditorContent] = useState<string>(initialValue);
+  const [editorContent, setEditorContent] = useState<string>(initVal);
 
   const handleEditorChange = (content: string) => {
     setEditorContent(content);
@@ -29,7 +29,7 @@ const TextEditor: React.FC<TextEditorProps> = ({
       tinymceScriptSrc="/tinymce/tinymce.min.js"
       licenseKey="gpl"
       id={id}
-      initialValue={initialValue}
+      initialValue={initVal}
       init={{
         height: 500,
         menubar: false,

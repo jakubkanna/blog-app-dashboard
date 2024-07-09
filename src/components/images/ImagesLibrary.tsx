@@ -1,9 +1,13 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Alert, AlertTitle, Button, Card, CardContent } from "@mui/material";
-import { AuthContext } from "../contexts/AuthContext";
-import { ImageInstance, AuthContextType, ImageLibraryProps } from "../../types";
-import "../styles/Library.scss";
-import useImageUrl from "../hooks/useImageURL";
+import { AuthContext } from "../../contexts/AuthContext";
+import {
+  ImageInstance,
+  AuthContextType,
+  ImageLibraryProps,
+} from "../../../types";
+import "../../styles/Library.scss";
+import useImageUrl from "../../hooks/useImageURL";
 
 const ImagesLibrary: React.FC<ImageLibraryProps> = ({
   imageList,

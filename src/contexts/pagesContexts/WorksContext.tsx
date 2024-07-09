@@ -21,11 +21,14 @@ export const WorksProvider: React.FC<ProviderProps> = ({ children }) => {
     setLoading(true);
     try {
       const response = await fetch("http://localhost:3000/api/works/");
-      const workData = await response.json();
 
-      const fetchedWorks: Work[] = workData.map((work: any) => ({
+      if (!response.ok) {
+        throw new Error("Failed to fetch posts");
+      }
+      const worksData = await response.json();
+
+      const fetchedWorks: Work[] = worksData.map((work: Work) => ({
         _id: work._id,
-        id: work._id,
         title: work.title,
         medium: work.medium,
         year: work.year,
@@ -66,11 +69,10 @@ export const WorksProvider: React.FC<ProviderProps> = ({ children }) => {
       }
 
       const updatedWork: Work = await response.json();
-      updatedWork.id = updatedWork._id;
 
       setWorks((prevWorks) =>
         prevWorks.map((work) =>
-          work.id === updatedWork.id ? updatedWork : work
+          work._id === updatedWork._id ? updatedWork : work
         )
       );
       return updatedWork;
@@ -97,11 +99,9 @@ export const WorksProvider: React.FC<ProviderProps> = ({ children }) => {
         throw new Error(result.error.message || "Failed to create work");
       }
 
-      const newWork: any = await response.json();
+      const newWork: Work = await response.json();
 
-      newWork.id = newWork._id;
-
-      setWorks((prevWorks) => [...prevWorks, newWork]);
+      setWorks((prevWorks) => [newWork, ...prevWorks]);
 
       return newWork;
     } catch (error) {
@@ -129,7 +129,7 @@ export const WorksProvider: React.FC<ProviderProps> = ({ children }) => {
       }
 
       // Update local works state by filtering out the deleted work
-      const updatedWorks = works.filter((work) => work.id !== workId);
+      const updatedWorks = works.filter((work) => work._id !== workId);
       setWorks(updatedWorks); // Update local state
     } catch (error) {
       console.error(error);

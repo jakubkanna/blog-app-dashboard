@@ -7,6 +7,7 @@ import { Event, ImageInstance, Option } from "../../types";
 import MuiTableCellModal from "../components/MuiTableCellModal";
 import InputAutocompleteField from "../components/InputAutoCompleteField";
 import ImagesSelectionPaper from "../components/images/ImagesSelectionField";
+import useFetchTags from "../hooks/useFetchTags";
 
 export default function Works() {
   const [editing, setEditing] = useState<{
@@ -27,20 +28,6 @@ export default function Works() {
       }));
     } catch (error) {
       console.error("Failed to fetch options:", error);
-      return [];
-    }
-  };
-
-  const fetchTags = async (): Promise<Option[]> => {
-    try {
-      const response = await fetch("http://localhost:3000/api/tags/");
-      const data = await response.json();
-      return data.map((tag: string) => ({
-        label: tag,
-        value: tag,
-      }));
-    } catch (error) {
-      console.error("Failed to fetch tags:", error);
       return [];
     }
   };
@@ -90,7 +77,7 @@ export default function Works() {
         case "tags":
           setModalBody(
             <InputAutocompleteField
-              fetchOptions={fetchTags}
+              fetchOptions={useFetchTags}
               initVal={params.row.tags.map((tag: string) => ({
                 label: tag,
                 value: tag,
@@ -135,7 +122,7 @@ export default function Works() {
       headerName: "Year",
       editable: true,
       type: "number",
-      valueFormatter: (value) => value,
+      valueFormatter: (value) => value && value,
     },
     {
       field: "images",
@@ -143,8 +130,8 @@ export default function Works() {
       flex: 1,
       editable: true,
       renderEditCell: (params: any) => <ModalCell params={params} />,
-      valueFormatter: (value: any) => {
-        const imageCount = value.length;
+      valueFormatter: (value: []) => {
+        const imageCount = value && value.length;
         if (imageCount) return `${imageCount} images selected`;
       },
     },
@@ -154,8 +141,8 @@ export default function Works() {
       flex: 1,
       editable: true,
       renderEditCell: (params: any) => <ModalCell params={params} />,
-      valueFormatter: (value: any) => {
-        return value.map((tag: string) => tag).join(", ");
+      valueFormatter: (value: []) => {
+        return value && value.map((tag: string) => tag).join(", ");
       },
     },
     {
@@ -165,7 +152,7 @@ export default function Works() {
       editable: true,
       renderEditCell: (params: any) => <ModalCell params={params} />,
       valueFormatter: (value: any) => {
-        return value.map((event: Event) => event.title).join(", ");
+        return value && value.map((event: Event) => event.title).join(", ");
       },
     },
     {

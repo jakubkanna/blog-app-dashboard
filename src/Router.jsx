@@ -1,10 +1,4 @@
-import {
-  Outlet,
-  RouterProvider,
-  createBrowserRouter,
-  useParams,
-  useLocation,
-} from "react-router-dom";
+import { Outlet, RouterProvider, createBrowserRouter } from "react-router-dom";
 import Login from "./pages/Login";
 import App from "./App";
 import Posts from "./pages/Posts";
@@ -14,7 +8,6 @@ import Works from "./pages/Works";
 import Dashboard from "./pages/Dashboard";
 import usePermissions from "./hooks/usePermissions";
 import Editor from "./components/editor/Editor";
-import { EditorContextProvider } from "./contexts/EditorContext";
 import PageContainer from "./components/PageContainer";
 import { EventsProvider } from "./contexts/pagesContexts/EventsContext";
 import { PostsProvider } from "./contexts/pagesContexts/PostsContext";
@@ -22,26 +15,19 @@ import { WorksProvider } from "./contexts/pagesContexts/WorksContext";
 
 import Images from "./pages/Images";
 import EventForm from "./components/EventForm";
+import { EditorProvider } from "./contexts/EditorContext";
 
 const ProtectedAdmin = () => {
   const { isLoggedIn } = usePermissions();
   return isLoggedIn ? <Outlet /> : <Login />;
 };
-
 const EditorWithContext = () => {
-  const location = useLocation();
-  const currentPath = location.pathname;
-  const storageKey = currentPath;
-  const { id } = useParams();
-  const isUpdatePath = currentPath.includes(id);
-
   return (
-    <EditorContextProvider storageKey={storageKey}>
-      <Editor isUpdateUrl={isUpdatePath} idParam={id} />
-    </EditorContextProvider>
+    <EditorProvider>
+      <Editor />
+    </EditorProvider>
   );
 };
-
 const routes = [
   {
     path: "/",
@@ -102,10 +88,9 @@ const routes = [
             path: "posts",
             element: (
               <PostsProvider>
-                <PageContainer title="Posts" />{" "}
+                <PageContainer title="Posts" />
               </PostsProvider>
             ),
-
             name: "Posts",
             children: [
               {

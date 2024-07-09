@@ -51,7 +51,6 @@ export interface ImagesModalProps {
 }
 
 export type Event = Partial<{
-  id: string;
   _id: string;
   title: string;
   subtitle: string;
@@ -68,7 +67,6 @@ export type Event = Partial<{
 
 export type Work = {
   _id: string;
-  id: string;
   title: string;
   medium?: string[];
   year?: number;
@@ -98,3 +96,21 @@ export interface SelectProps {
   onChange: () => void;
   initVal: Option[];
 }
+
+export type Post = {
+  _id: string;
+  author: string;
+  timestamp: Date;
+  title: string;
+  content: [Block];
+  public: boolean;
+  slug: string;
+  tags: string[];
+  modified?: Date;
+};
+
+export type Block = {
+  id: string;
+  content: string;
+  index: number;
+};

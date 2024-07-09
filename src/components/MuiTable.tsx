@@ -19,7 +19,6 @@ import {
   GridToolbarContainer,
   GridRowModel,
 } from "@mui/x-data-grid";
-import { randomId } from "@mui/x-data-grid-generator";
 import { Alert, AlertProps, Snackbar } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { PageContextType } from "../../types";
@@ -29,33 +28,6 @@ interface EditToolbarProps {
   setRowModesModel: (
     newModel: (oldModel: GridRowModesModel) => GridRowModesModel
   ) => void;
-}
-
-function EditToolbar(props: EditToolbarProps) {
-  const { setRows, setRowModesModel } = props;
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const handleClick = () => {
-    if (location.pathname === "/admin/posts") {
-      navigate(`create`);
-    } else {
-      const id = randomId();
-      setRows((oldRows) => [{ id, isNew: true }, ...oldRows]);
-      setRowModesModel((oldModel) => ({
-        [id]: { mode: GridRowModes.Edit, fieldToFocus: "title" },
-        ...oldModel,
-      }));
-    }
-  };
-
-  return (
-    <GridToolbarContainer>
-      <Button color="primary" startIcon={<AddIcon />} onClick={handleClick}>
-        Add new
-      </Button>
-    </GridToolbarContainer>
-  );
 }
 
 interface MuiTableProps {
@@ -77,8 +49,43 @@ export default function MuiTable({ columns, context }: MuiTableProps) {
   const navigate = useNavigate();
 
   React.useMemo(() => {
+    console.log(data);
     setRows(data);
   }, [data]);
+
+  function EditToolbar(props: EditToolbarProps) {
+    const { setRows, setRowModesModel } = props;
+
+    const handleClick = async () => {
+      const newRow = { title: "Untitled" };
+      try {
+        const createdItem = await createData(newRow);
+        const id = createdItem._id;
+        setSnackbar({
+          children: "Item successfully created",
+          severity: "success",
+        });
+
+        setRows((oldRows) => [{ id, isNew: true }, ...oldRows]);
+        setRowModesModel((oldModel) => ({
+          [id]: { mode: GridRowModes.Edit, fieldToFocus: "title" },
+          ...oldModel,
+        }));
+        return createdItem;
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+    };
+
+    return (
+      <GridToolbarContainer>
+        <Button color="primary" startIcon={<AddIcon />} onClick={handleClick}>
+          Add new
+        </Button>
+      </GridToolbarContainer>
+    );
+  }
 
   const handleRowEditStop: GridEventListener<"rowEditStop"> = (
     params,
@@ -90,11 +97,12 @@ export default function MuiTable({ columns, context }: MuiTableProps) {
   };
 
   const handleEditClick = (id: GridRowId) => () => {
-    const rowData = rows.find((row) => row.id === id);
     switch (location.pathname) {
       case "/admin/posts":
+        navigate(`update/${id}`);
+        break;
       case "/admin/events":
-        navigate(`update/${id}`, { state: { rowData } });
+        navigate(`update/${id}`);
         break;
       default:
         setRowModesModel({
@@ -129,50 +137,27 @@ export default function MuiTable({ columns, context }: MuiTableProps) {
       [id]: { mode: GridRowModes.View, ignoreModifications: true },
     });
 
-    const editedRow = rows.find((row) => row.id === id);
-    if (editedRow!.isNew) {
-      setRows(rows.filter((row) => row.id !== id));
-    }
+    setRows(rows.filter((row) => row.id !== id));
   };
 
   const handleCloseSnackbar = () => setSnackbar(null);
 
   const handleProcessRowUpdate = async (newRow: GridRowModel) => {
-    if (newRow.isNew) {
-      try {
-        const createdItem = await createData(newRow);
+    try {
+      const updatedItem = await updateData(newRow);
 
-        setSnackbar({
-          children: "Item successfully created",
-          severity: "success",
-        });
+      setSnackbar({
+        children: "Item successfully updated",
+        severity: "success",
+      });
 
-        setRows((rows) =>
-          rows.map((row) => (row.id === newRow.id ? createdItem : row))
-        );
-
-        return createdItem;
-      } catch (error) {
-        console.error(error);
-        throw error;
-      }
-    } else {
-      try {
-        const updatedItem = await updateData(newRow);
-
-        setSnackbar({
-          children: "Item successfully updated",
-          severity: "success",
-        });
-
-        setRows((rows) =>
-          rows.map((row) => (row.id === newRow.id ? updatedItem : row))
-        );
-        return updatedItem;
-      } catch (error) {
-        console.error(error);
-        throw error;
-      }
+      setRows((rows) =>
+        rows.map((row) => (row.id === newRow.id ? updatedItem : row))
+      );
+      return updatedItem;
+    } catch (error) {
+      console.error(error);
+      throw error;
     }
   };
 
@@ -231,6 +216,7 @@ export default function MuiTable({ columns, context }: MuiTableProps) {
   return (
     <>
       <DataGrid
+        getRowId={(row) => row._id}
         rows={rows}
         columns={combinedColumns}
         editMode="row"
@@ -241,6 +227,7 @@ export default function MuiTable({ columns, context }: MuiTableProps) {
         onProcessRowUpdateError={handleProcessRowUpdateError}
         slots={{ toolbar: EditToolbar as GridSlots["toolbar"] }}
         slotProps={{ toolbar: { setRows, setRowModesModel } }}
+        autoHeight
       />
       {!!snackbar && (
         <Snackbar

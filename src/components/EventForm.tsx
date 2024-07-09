@@ -20,10 +20,11 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 import { useEventsContext } from "../contexts/pagesContexts/EventsContext";
 import _ from "lodash";
-import { Form, useParams } from "react-router-dom";
+import { Form, useNavigate, useParams } from "react-router-dom";
 import LoadingButton from "@mui/lab/LoadingButton";
 import InputAutocompleteField from "./InputAutoCompleteField";
 import { Post } from "../contexts/pagesContexts/PostsContext";
+import useFetchTags from "../hooks/useFetchTags";
 
 export default function EventForm() {
   const [formData, setFormData] = React.useState<Event | null>(null);
@@ -34,6 +35,7 @@ export default function EventForm() {
   > | null>(null);
   let { id: eventId } = useParams();
   const [loading, setLoading] = React.useState(true);
+  const navigate = useNavigate();
 
   // Fetchers
 
@@ -57,20 +59,6 @@ export default function EventForm() {
   }, []);
 
   //async
-
-  const fetchTags = async (): Promise<Option[]> => {
-    try {
-      const response = await fetch("http://localhost:3000/api/tags/");
-      const data = await response.json();
-      return data.map((tag: string) => ({
-        label: tag,
-        value: tag,
-      }));
-    } catch (error) {
-      console.error("Failed to fetch tags:", error);
-      return [];
-    }
-  };
 
   const fetchPosts = async (): Promise<Option[]> => {
     try {
@@ -107,6 +95,10 @@ export default function EventForm() {
         });
         setLoading(false);
       });
+  };
+
+  const handleCancel = () => {
+    navigate("/admin/events");
   };
 
   const handleInputChange = (e: any) => {
@@ -198,7 +190,7 @@ export default function EventForm() {
                 </InputLabel>
                 <TextEditor
                   id="subtitle"
-                  initialValue={formData.subtitle}
+                  initVal={formData.subtitle}
                   onBlur={handleInputChange}
                 />
               </Grid>
@@ -208,7 +200,7 @@ export default function EventForm() {
                 </InputLabel>
                 <TextEditor
                   id="description"
-                  initialValue={formData.description}
+                  initVal={formData.description}
                   onBlur={handleInputChange}
                 />
               </Grid>
@@ -291,7 +283,7 @@ export default function EventForm() {
               </Grid>
               <Grid item xs={12}>
                 <InputAutocompleteField
-                  fetchOptions={fetchTags}
+                  fetchOptions={useFetchTags}
                   initVal={
                     formData.tags?.map((tag: string) => ({
                       label: tag,
@@ -331,6 +323,13 @@ export default function EventForm() {
                     variant="contained"
                     size="large">
                     Save
+                  </LoadingButton>
+                  <LoadingButton
+                    type="button"
+                    variant="contained"
+                    size="large"
+                    onClick={handleCancel}>
+                    Cancel
                   </LoadingButton>
                 </Grid>
               </Grid>
