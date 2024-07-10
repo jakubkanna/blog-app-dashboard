@@ -1,6 +1,7 @@
 import { Outlet } from "react-router-dom";
 import { Container, Typography } from "@mui/material";
 
+// eslint-disable-next-line react/prop-types
 const PageContainer = ({ title }) => {
   return (
     <Container maxWidth="100%">

@@ -1,4 +1,3 @@
-import "../../styles/Create.scss";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import {
@@ -27,12 +26,12 @@ export default function Editor() {
   const { id } = useParams<{ id?: string }>();
   const { data, updateData, loading } = usePostsContext();
   const init = data.find((item) => item._id === id);
+
+  const navigate = useNavigate();
   const { setUnsavedChanges, removeUnsavedChanges } =
     useUnsavedChangesTracker();
-  const navigate = useNavigate();
 
-  // Early return if init is not available
-  if (!init) return <Typography>Loading...</Typography>;
+  useEffect(setUnsavedChanges, []);
 
   //states
 
@@ -40,7 +39,7 @@ export default function Editor() {
     AlertProps,
     "children" | "severity"
   > | null>(null);
-  const [post, setPost] = useState<Post>(init);
+  const [post, setPost] = useState<Post | undefined>(init);
 
   //handlers
 
@@ -74,7 +73,7 @@ export default function Editor() {
 
   const handleCancel = () => {
     removeUnsavedChanges();
-    navigate("/admin/posts");
+    navigate("/admin/posts/");
   };
 
   const handleChange = (e: { target: { name: string; value: string } }) => {
@@ -85,109 +84,109 @@ export default function Editor() {
     }));
   };
 
-  useEffect(setUnsavedChanges, [post]);
-
   return (
-    <Box component="form" className="post-editor" onSubmit={handleSubmit}>
-      <Typography variant="h2" gutterBottom>
-        Editing: <em>{post.title}</em>
-      </Typography>
-      <Grid container spacing={2}>
-        <Grid item xs={8}>
-          <Typography variant="h6" gutterBottom>
-            Title
-          </Typography>
-          <Grid item className="post-editor-header">
-            <TextField
-              label="Title"
-              name="title"
-              value={post.title}
-              onChange={handleChange}
-              fullWidth
-              margin="normal"
-            />
+    post && (
+      <Box component="form" className="post-editor" onSubmit={handleSubmit}>
+        <Typography variant="h2" gutterBottom>
+          Editing: <em>{post.title}</em>
+        </Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={8}>
+            <Typography variant="h6" gutterBottom>
+              Title
+            </Typography>
+            <Grid item className="post-editor-header">
+              <TextField
+                label="Title"
+                name="title"
+                value={post.title}
+                onChange={handleChange}
+                fullWidth
+                margin="normal"
+              />
+            </Grid>
+            <Typography variant="h6" gutterBottom>
+              Content
+            </Typography>
+            <Grid item className="post-editor-body">
+              <EditorBlocks blocks={post.content} setBlocks={setBlocks} />
+              <EditorMenu blocks={post.content} setBlocks={setBlocks} />
+            </Grid>
           </Grid>
-          <Typography variant="h6" gutterBottom>
-            Content
-          </Typography>
-          <Grid item className="post-editor-body">
-            <EditorBlocks blocks={post.content} setBlocks={setBlocks} />
-            <EditorMenu blocks={post.content} setBlocks={setBlocks} />
+          <Grid item xs={4}>
+            <Typography variant="h6" gutterBottom>
+              Summary
+            </Typography>
+            <Grid>
+              <TextField
+                label="Slug"
+                name="slug"
+                value={post.slug}
+                onChange={handleChange}
+                fullWidth
+              />
+              <InputLabel>
+                Final path: <Link to="#">Link</Link>
+              </InputLabel>
+            </Grid>
+            <Grid>
+              <InputAutocompleteField
+                fetchOptions={useFetchTags}
+                initVal={
+                  post.tags?.map((tag: string) => ({
+                    label: tag,
+                    value: tag,
+                  })) || []
+                }
+                id={"tags"}
+                label={"Tags"}
+                onChange={(value) => console.log(value)}
+                multiple
+                freeSolo
+              />
+              <FormControlLabel
+                control={<Switch checked={post.public} name="public" />}
+                label="Public"
+              />
+            </Grid>
+            <Grid
+              item
+              className="post-editor-footer"
+              xs={12}
+              sx={{
+                position: "fixed",
+                right: 0,
+                bottom: 0,
+                margin: "1rem",
+              }}>
+              <LoadingButton
+                loading={loading}
+                type="submit"
+                variant="contained"
+                size="large">
+                Save
+              </LoadingButton>
+              <LoadingButton
+                loading={loading}
+                type="button"
+                variant="contained"
+                size="large"
+                onClick={handleCancel}>
+                Cancel
+              </LoadingButton>
+            </Grid>
           </Grid>
         </Grid>
-        <Grid item xs={4}>
-          <Typography variant="h6" gutterBottom>
-            Summary
-          </Typography>
-          <Grid>
-            <TextField
-              label="Slug"
-              name="slug"
-              value={post.slug}
-              onChange={handleChange}
-              fullWidth
-            />
-            <InputLabel>
-              Final path: <Link to="#">Link</Link>
-            </InputLabel>
-          </Grid>
-          <Grid>
-            <InputAutocompleteField
-              fetchOptions={useFetchTags}
-              initVal={
-                post.tags?.map((tag: string) => ({
-                  label: tag,
-                  value: tag,
-                })) || []
-              }
-              id={"tags"}
-              label={"Tags"}
-              onChange={(value) => console.log(value)}
-              multiple
-              freeSolo
-            />
-            <FormControlLabel
-              control={<Switch checked={post.public} name="public" />}
-              label="Public"
-            />
-          </Grid>
-          <Grid
-            item
-            className="post-editor-footer"
-            xs={12}
-            sx={{
-              position: "fixed",
-              right: 0,
-              bottom: 0,
-              margin: "1rem",
-            }}>
-            <LoadingButton
-              loading={loading}
-              type="submit"
-              variant="contained"
-              size="large">
-              Save
-            </LoadingButton>
-            <LoadingButton
-              loading={loading}
-              type="button"
-              variant="contained"
-              size="large"
-              onClick={handleCancel}>
-              Cancel
-            </LoadingButton>
-          </Grid>
-        </Grid>
-      </Grid>
-      {!!snackbar && (
-        <Snackbar
-          open
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-          onClose={handleCloseSnackbar}
-          autoHideDuration={6000}>
-          <Alert {...snackbar} onClose={handleCloseSnackbar} />
-        </Snackbar>
-      )}
-    </Box>
+        {!!snackbar && (
+          <Snackbar
+            open
+            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+            onClose={handleCloseSnackbar}
+            autoHideDuration={6000}>
+            <Alert {...snackbar} onClose={handleCloseSnackbar} />
+          </Snackbar>
+        )}
+      </Box>
+    )
   );
 }

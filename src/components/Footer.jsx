@@ -1,6 +1,3 @@
-import "../styles/Footer.scss";
-import { Github } from "lucide-react";
-
 export default function Footer() {
   return (
     <footer>

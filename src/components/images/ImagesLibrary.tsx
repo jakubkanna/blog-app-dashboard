@@ -6,7 +6,6 @@ import {
   AuthContextType,
   ImageLibraryProps,
 } from "../../../types";
-import "../../styles/Library.scss";
 import useImageUrl from "../../utils/useImageURL";
 
 const ImagesLibrary: React.FC<ImageLibraryProps> = ({

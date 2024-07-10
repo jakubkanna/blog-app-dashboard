@@ -1,4 +1,3 @@
-import "../styles/Header.css";
 import Logout from "./Logout";
 import usePermissions from "../utils/usePermissions";
 

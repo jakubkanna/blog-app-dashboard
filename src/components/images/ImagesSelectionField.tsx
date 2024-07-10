@@ -64,7 +64,7 @@ const ImagesSelectionPaper: React.FC<ImageSelectionPaperProps> = ({
   return (
     <Paper
       ref={paperRef}
-      sx={{ border: isActive ? "solid #1976d2 1px" : "1px solid #ccc" }} // Indicate active state
+      sx={{ border: isActive ? "solid #1976d2 1px" : "1px solid #ccc" }}
       onClick={handleFocus}>
       <Box p={2}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: "16px" }}>

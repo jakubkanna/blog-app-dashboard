@@ -1,5 +1,6 @@
 // public submit, selected images field click
-import * as React from "react";
+import React, { useEffect, useState } from "react";
+
 import {
   TextField,
   FormControlLabel,
@@ -26,38 +27,23 @@ import LoadingButton from "@mui/lab/LoadingButton";
 import InputAutocompleteField from "./InputAutoCompleteField";
 import { Post } from "../../types";
 import { useFetchTags } from "../utils/useFetch";
+import useUnsavedChangesTracker from "../utils/useUnsavedChangesTracker";
 
 export default function EventForm() {
-  const [formData, setFormData] = React.useState<Event | null>(null);
-  const { updateData } = useEventsContext();
   const [snackbar, setSnackbar] = React.useState<Pick<
     AlertProps,
     "children" | "severity"
   > | null>(null);
-  let { id: eventId } = useParams();
-  const [loading, setLoading] = React.useState(true);
+  const { id } = useParams<{ id?: string }>();
   const navigate = useNavigate();
+  const { data, updateData, loading } = useEventsContext();
+  const init = data.find((item) => item._id === id);
 
-  // Fetchers
+  const [event, setEvent] = useState<Event | undefined>(init);
+  const { setUnsavedChanges, removeUnsavedChanges } =
+    useUnsavedChangesTracker();
 
-  React.useEffect(() => {
-    // Fetch formData
-    (async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:3000/api/events/${eventId}`
-        );
-        const data = await response.json();
-        if (response.ok) {
-          setFormData(data);
-          setLoading(false);
-        }
-      } catch (error) {
-        console.error("Failed to fetch tags:", error);
-        return [];
-      }
-    })();
-  }, []);
+  useEffect(setUnsavedChanges, []);
 
   //async
 
@@ -77,16 +63,15 @@ export default function EventForm() {
 
   // Handlers
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    setLoading(true);
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    updateData(formData)
+    updateData(event)
       .then(() => {
         setSnackbar({
           children: "Event successfully updated",
           severity: "success",
         });
-        setLoading(false);
+        removeUnsavedChanges();
       })
       .catch((error) => {
         console.error("Update error:", error);
@@ -94,18 +79,18 @@ export default function EventForm() {
           children: "Event update error",
           severity: "error",
         });
-        setLoading(false);
       });
   };
 
   const handleCancel = () => {
-    navigate("/admin/events");
+    removeUnsavedChanges();
+    navigate("/admin/events/");
   };
 
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
-    setFormData((prevFormData) => ({
-      ...prevFormData,
+    setEvent((prevdata) => ({
+      ...prevdata,
       [name]: value,
     }));
   };
@@ -114,16 +99,16 @@ export default function EventForm() {
     const retrivedValue = Array.isArray(value)
       ? value.map((item) => item.value)
       : value.value;
-    setFormData((prevFormData) => ({
-      ...prevFormData,
+    setEvent((prevdata) => ({
+      ...prevdata,
       post: retrivedValue,
     }));
   };
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
-    setFormData((prevFormData) => {
-      return { ...prevFormData, [name]: checked };
+    setEvent((prevdata) => {
+      return { ...prevdata, [name]: checked };
     });
   };
 
@@ -132,29 +117,29 @@ export default function EventForm() {
       ? value.map((item) => item.value)
       : [];
 
-    setFormData((prevFormData) => ({
-      ...prevFormData,
+    setEvent((prevdata) => ({
+      ...prevdata,
       tags: retrivedValue,
     }));
   };
 
   const handleStartDateChange = (date: dayjs.Dayjs | null) => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
+    setEvent((prevdata) => ({
+      ...prevdata,
       start_date: date ? date.toDate() : undefined,
     }));
   };
 
   const handleEndDateChange = (date: dayjs.Dayjs | null) => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
+    setEvent((prevdata) => ({
+      ...prevdata,
       end_date: date ? date.toDate() : undefined,
     }));
   };
 
   const handleImagesChange = (value: ImageInstance[]) => {
-    setFormData((prevFormData) => ({
-      ...prevFormData,
+    setEvent((prevdata) => ({
+      ...prevdata,
       images: value,
     }));
   };
@@ -164,10 +149,10 @@ export default function EventForm() {
   // Render
 
   return (
-    formData && (
+    event && (
       <Box component="form" className="event-editor" onSubmit={handleSubmit}>
         <Typography variant="h2" gutterBottom>
-          Editing: <em>{formData.title}</em>
+          Editing: <em>{event.title}</em>
         </Typography>
         <Grid container spacing={2}>
           <Grid item xs={8}>
@@ -179,7 +164,7 @@ export default function EventForm() {
                 <TextField
                   label="Title"
                   name="title"
-                  value={formData.title}
+                  value={event.title}
                   onChange={handleInputChange}
                   fullWidth
                   margin="normal"
@@ -191,7 +176,7 @@ export default function EventForm() {
                 </InputLabel>
                 <TextEditor
                   id="subtitle"
-                  initVal={formData.subtitle}
+                  initVal={event.subtitle}
                   onBlur={handleInputChange}
                 />
               </Grid>
@@ -201,7 +186,7 @@ export default function EventForm() {
                 </InputLabel>
                 <TextEditor
                   id="description"
-                  initVal={formData.description}
+                  initVal={event.description}
                   onBlur={handleInputChange}
                 />
               </Grid>
@@ -210,7 +195,7 @@ export default function EventForm() {
                   Images
                 </Typography>
                 <ImagesSelectionPaper
-                  initVal={formData.images || []}
+                  initVal={event.images || []}
                   onChange={handleImagesChange}
                 />
               </Grid>
@@ -226,9 +211,7 @@ export default function EventForm() {
                   <DatePicker
                     label="Start Date"
                     name="start_date"
-                    value={
-                      formData.start_date ? dayjs(formData.start_date) : null
-                    }
+                    value={event.start_date ? dayjs(event.start_date) : null}
                     onChange={handleStartDateChange}
                     slotProps={{ textField: { fullWidth: true } }}
                   />
@@ -237,7 +220,7 @@ export default function EventForm() {
                   <DatePicker
                     label="End Date"
                     name="end_date"
-                    value={formData.end_date ? dayjs(formData.end_date) : null}
+                    value={event.end_date ? dayjs(event.end_date) : null}
                     onChange={handleEndDateChange}
                     slotProps={{ textField: { fullWidth: true } }}
                   />
@@ -246,7 +229,7 @@ export default function EventForm() {
                   <TextField
                     label="Venue"
                     name="venue"
-                    defaultValue={formData.venue}
+                    defaultValue={event.venue}
                     onChange={handleInputChange}
                     fullWidth
                     margin="normal"
@@ -262,7 +245,7 @@ export default function EventForm() {
                 <TextField
                   label="External URL"
                   name="external_url"
-                  defaultValue={formData.external_url}
+                  defaultValue={event.external_url}
                   onChange={handleInputChange}
                   fullWidth
                   margin="normal"
@@ -273,8 +256,8 @@ export default function EventForm() {
                   fetchOptions={fetchPosts}
                   initVal={
                     {
-                      label: formData.post?.title,
-                      value: formData.post?._id,
+                      label: event.post?.title,
+                      value: event.post?._id,
                     } || { label: "", value: "" }
                   }
                   id={"posts"}
@@ -286,7 +269,7 @@ export default function EventForm() {
                 <InputAutocompleteField
                   fetchOptions={useFetchTags}
                   initVal={
-                    formData.tags?.map((tag: string) => ({
+                    event.tags?.map((tag: string) => ({
                       label: tag,
                       value: tag,
                     })) || []
@@ -302,7 +285,7 @@ export default function EventForm() {
                 <FormControlLabel
                   control={
                     <Switch
-                      checked={formData.public}
+                      checked={event.public}
                       onChange={handleCheckboxChange}
                       name="public"
                     />
