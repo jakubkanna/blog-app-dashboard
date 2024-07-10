@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Box, Paper, InputLabel } from "@mui/material";
+import { Box, Card, InputLabel } from "@mui/material";
 import ImagesSelectableList from "./ImagesSelectableList";
 import ImagesUploader from "./ImagesUploader";
 import { ImageInstance } from "../../../types";
@@ -62,7 +62,7 @@ const ImagesSelectionPaper: React.FC<ImageSelectionPaperProps> = ({
   }, [selectedImgList]);
 
   return (
-    <Paper
+    <Card
       ref={paperRef}
       sx={{ border: isActive ? "solid #1976d2 1px" : "1px solid #ccc" }}
       onClick={handleFocus}>
@@ -89,7 +89,7 @@ const ImagesSelectionPaper: React.FC<ImageSelectionPaperProps> = ({
           )}
         </Box>
       </Box>
-    </Paper>
+    </Card>
   );
 };
 

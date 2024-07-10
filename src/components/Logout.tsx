@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { AuthContext } from "../contexts/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@mui/material";
 
 export default function Logout() {
@@ -27,5 +27,9 @@ export default function Logout() {
     }
   };
 
-  return <Button onClick={handleLogout}>Logout</Button>;
+  return (
+    <Button color="inherit" variant="text" onClick={handleLogout}>
+      Logout
+    </Button>
+  );
 }

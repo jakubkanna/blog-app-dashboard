@@ -191,9 +191,7 @@ export default function EventForm() {
                 />
               </Grid>
               <Grid item xs={12}>
-                <Typography variant="h6" gutterBottom>
-                  Images
-                </Typography>
+                <InputLabel shrink>Images</InputLabel>
                 <ImagesSelectionPaper
                   initVal={event.images || []}
                   onChange={handleImagesChange}
