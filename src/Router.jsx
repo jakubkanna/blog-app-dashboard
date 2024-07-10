@@ -6,7 +6,7 @@ import Settings from "./pages/Settings";
 import Events from "./pages/Events";
 import Works from "./pages/Works";
 import Dashboard from "./pages/Dashboard";
-import usePermissions from "./hooks/usePermissions";
+import usePermissions from "./utils/usePermissions";
 import Editor from "./components/editor/Editor";
 import PageContainer from "./components/PageContainer";
 import { EventsProvider } from "./contexts/pagesContexts/EventsContext";
@@ -15,19 +15,12 @@ import { WorksProvider } from "./contexts/pagesContexts/WorksContext";
 
 import Images from "./pages/Images";
 import EventForm from "./components/EventForm";
-import { EditorProvider } from "./contexts/EditorContext";
 
 const ProtectedAdmin = () => {
   const { isLoggedIn } = usePermissions();
   return isLoggedIn ? <Outlet /> : <Login />;
 };
-const EditorWithContext = () => {
-  return (
-    <EditorProvider>
-      <Editor />
-    </EditorProvider>
-  );
-};
+
 const routes = [
   {
     path: "/",
@@ -99,12 +92,12 @@ const routes = [
               },
               {
                 path: "create",
-                element: <EditorWithContext />,
+                element: <Editor />,
                 name: "Create Post",
               },
               {
                 path: "update/:id",
-                element: <EditorWithContext />,
+                element: <Editor />,
                 name: "Update Post",
               },
             ],

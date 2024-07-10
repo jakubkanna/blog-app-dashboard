@@ -10,6 +10,7 @@ import {
   Snackbar,
   Alert,
   Switch,
+  Box,
 } from "@mui/material";
 import { Event, ImageInstance, Option } from "../../types";
 import TextEditor from "./TextEditor";
@@ -164,7 +165,7 @@ export default function EventForm() {
 
   return (
     formData && (
-      <Form onSubmit={handleSubmit}>
+      <Box component="form" className="event-editor" onSubmit={handleSubmit}>
         <Typography variant="h2" gutterBottom>
           Editing: <em>{formData.title}</em>
         </Typography>
@@ -345,7 +346,7 @@ export default function EventForm() {
             <Alert {...snackbar} onClose={handleCloseSnackbar} />
           </Snackbar>
         )}
-      </Form>
+      </Box>
     )
   );
 }

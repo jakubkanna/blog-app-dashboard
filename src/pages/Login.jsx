@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import LoginForm from "../components/LoginForm";
 import Logout from "../components/Logout";
-import usePermissions from "../hooks/usePermissions";
+import usePermissions from "../utils/usePermissions";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 

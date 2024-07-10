@@ -7,7 +7,6 @@ import {
   useDeleteData,
 } from "./useFetch";
 
-// Define a generic type T for the data being handled
 const createGenericContext = <T extends {}>(
   fetchUrl: string,
   createUrl: string,

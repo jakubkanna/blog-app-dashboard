@@ -1,19 +1,20 @@
 import { Plus } from "lucide-react";
-import { useContext, useState } from "react";
-import { EditorContext } from "../../contexts/EditorContext";
+import { useState } from "react";
 import { Button } from "@mui/material";
+import { Block } from "../../../types";
 
-export default function EditorMenu() {
-  const { blocks, setBlocks } = useContext(EditorContext);
+export default function EditorMenu({ blocks, setBlocks }) {
   const [showButtons, setShowButtons] = useState(false);
   const handleNewBlockBtn = () => {
     setShowButtons(!showButtons);
   };
 
-  const addBlock = (type) => {
-    const newBlock = {
+  const addBlock = (type: string) => {
+    const newBlock: Block = {
+      id: `${type}-block-${blocks.length}`,
+      index: blocks.length,
+      html: "",
       type: type,
-      id: blocks.length,
     };
 
     const newData = [...blocks, newBlock];
@@ -25,16 +26,16 @@ export default function EditorMenu() {
     <div className="new-block-menu">
       <Button
         className="new-block-btn"
-        type="Button"
+        type="button"
         onClick={handleNewBlockBtn}>
         <small>Add new block</small> <Plus />
       </Button>
       {showButtons && (
         <div className="new-block-blocks-btns">
-          <Button type="Button" onClick={() => addBlock("text")}>
+          <Button type="button" onClick={() => addBlock("text")}>
             Text
           </Button>
-          <Button type="Button" onClick={() => addBlock("image")}>
+          <Button type="button" onClick={() => addBlock("image")}>
             Image
           </Button>
         </div>

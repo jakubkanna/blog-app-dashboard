@@ -64,7 +64,6 @@ export type Event = {
   external_url: URL;
   public: boolean;
 };
-
 export type Work = {
   _id: string;
   title: string;
@@ -74,6 +73,17 @@ export type Work = {
   images?: any[];
   tags?: any[];
   public?: boolean;
+};
+export type Post = {
+  _id: string;
+  author: string;
+  timestamp: Date;
+  title: string;
+  content: Block[];
+  public: boolean;
+  slug: string;
+  tags: string[];
+  modified?: Date;
 };
 
 export type PageContextType<T> = {
@@ -97,20 +107,9 @@ export interface SelectProps {
   initVal: Option[];
 }
 
-export type Post = {
-  _id: string;
-  author: string;
-  timestamp: Date;
-  title: string;
-  content: [Block];
-  public: boolean;
-  slug: string;
-  tags: string[];
-  modified?: Date;
-};
-
 export type Block = {
   id: string;
-  content: string;
+  html: string;
+  type: string;
   index: number;
 };

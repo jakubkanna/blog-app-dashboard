@@ -1,7 +1,6 @@
-import { ThemeToggleBtn } from "./ToggleThemeButton";
 import "../styles/Header.css";
 import Logout from "./Logout";
-import usePermissions from "../hooks/usePermissions";
+import usePermissions from "../utils/usePermissions";
 
 export default function Header() {
   const { isLoggedIn } = usePermissions();
@@ -11,9 +10,6 @@ export default function Header() {
       <nav>
         <h1 className="brandname">Admin Dashboard</h1>
         <ul className="menu">
-          {/* <li className="menu-item">
-            <ThemeToggleBtn />
-          </li> */}
           {isLoggedIn && (
             <li className="menu-item">
               <Logout />
