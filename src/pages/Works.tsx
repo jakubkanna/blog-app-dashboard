@@ -7,7 +7,7 @@ import { Event, ImageInstance, Option } from "../../types";
 import MuiTableCellModal from "../components/MuiTableCellModal";
 import InputAutocompleteField from "../components/InputAutoCompleteField";
 import ImagesSelectionPaper from "../components/images/ImagesSelectionField";
-import useFetchTags from "../hooks/useFetchTags";
+import { useFetchTags } from "../utils/useFetch";
 
 export default function Works() {
   const [editing, setEditing] = useState<{

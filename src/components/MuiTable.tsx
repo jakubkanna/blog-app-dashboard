@@ -32,11 +32,11 @@ interface EditToolbarProps {
 
 interface MuiTableProps {
   columns: GridColDef[];
-  context: () => PageContextType;
+  context: () => PageContextType<T>;
 }
 
 export default function MuiTable({ columns, context }: MuiTableProps) {
-  const { data, updateData, createData, deleteData } = context();
+  const { data, updateData, createData, deleteData, loading } = context();
   const [rows, setRows] = React.useState<GridRowsProp>([]);
   const [rowModesModel, setRowModesModel] = React.useState<GridRowModesModel>(
     {}
@@ -49,7 +49,6 @@ export default function MuiTable({ columns, context }: MuiTableProps) {
   const navigate = useNavigate();
 
   React.useMemo(() => {
-    console.log(data);
     setRows(data);
   }, [data]);
 
@@ -74,7 +73,10 @@ export default function MuiTable({ columns, context }: MuiTableProps) {
         return createdItem;
       } catch (error) {
         console.error(error);
-        throw error;
+        setSnackbar({
+          children: "An error occurred while creating a new item",
+          severity: "error",
+        });
       }
     };
 
@@ -117,17 +119,32 @@ export default function MuiTable({ columns, context }: MuiTableProps) {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
   };
 
-  const handleDeleteClick = (id: GridRowId) => () => {
+  const handleDeleteClick = (id: GridRowId) => async () => {
     const result = window.confirm(
       `Are you sure you want to delete item: ID:${id} permanently?`
     );
     if (result) {
-      setRows(rows.filter((row) => row.id !== id));
-      deleteData(id);
-      setSnackbar({
-        children: "Item successfully deleted",
-        severity: "success",
-      });
+      try {
+        const success = await deleteData(id as string); // cast id to string
+        if (success) {
+          setRows((rows) => rows.filter((row) => row.id !== id));
+          setSnackbar({
+            children: "Item successfully deleted",
+            severity: "success",
+          });
+        } else {
+          setSnackbar({
+            children: "Failed to delete item",
+            severity: "error",
+          });
+        }
+      } catch (error) {
+        console.error("Failed to delete item:", error);
+        setSnackbar({
+          children: "An error occurred while deleting the item",
+          severity: "error",
+        });
+      }
     }
   };
 
@@ -161,8 +178,8 @@ export default function MuiTable({ columns, context }: MuiTableProps) {
     }
   };
 
-  const handleProcessRowUpdateError = React.useCallback((error: Error) => {
-    setSnackbar({ children: error.message, severity: "error" });
+  const handleProcessRowUpdateError = React.useCallback(() => {
+    setSnackbar({ children: "Error during update", severity: "error" });
   }, []);
 
   const handleRowModesModelChange = (newRowModesModel: GridRowModesModel) => {
@@ -227,6 +244,7 @@ export default function MuiTable({ columns, context }: MuiTableProps) {
         onProcessRowUpdateError={handleProcessRowUpdateError}
         slots={{ toolbar: EditToolbar as GridSlots["toolbar"] }}
         slotProps={{ toolbar: { setRows, setRowModesModel } }}
+        loading={loading}
         autoHeight
       />
       {!!snackbar && (

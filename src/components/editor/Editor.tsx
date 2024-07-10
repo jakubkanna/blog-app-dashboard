@@ -11,7 +11,7 @@ import {
 import { LoadingButton } from "@mui/lab";
 import Grid from "@mui/material/Grid";
 import InputAutocompleteField from "../InputAutoCompleteField";
-import useFetchTags from "../../hooks/useFetchTags";
+import { useFetchTags } from "../../utils/useFetch";
 import EditorContent from "./EditorContent";
 import { EditorContext } from "../../contexts/EditorContext";
 

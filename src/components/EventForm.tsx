@@ -23,8 +23,8 @@ import _ from "lodash";
 import { Form, useNavigate, useParams } from "react-router-dom";
 import LoadingButton from "@mui/lab/LoadingButton";
 import InputAutocompleteField from "./InputAutoCompleteField";
-import { Post } from "../contexts/pagesContexts/PostsContext";
-import useFetchTags from "../hooks/useFetchTags";
+import { Post } from "../../types";
+import { useFetchTags } from "../utils/useFetch";
 
 export default function EventForm() {
   const [formData, setFormData] = React.useState<Event | null>(null);

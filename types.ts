@@ -50,7 +50,7 @@ export interface ImagesModalProps {
   fetchPath: "events" | "works";
 }
 
-export type Event = Partial<{
+export type Event = {
   _id: string;
   title: string;
   subtitle: string;
@@ -63,7 +63,7 @@ export type Event = Partial<{
   post?: { title: string; _id: string };
   external_url: URL;
   public: boolean;
-}>;
+};
 
 export type Work = {
   _id: string;
@@ -76,12 +76,12 @@ export type Work = {
   public?: boolean;
 };
 
-export type PageContextType = {
-  data: any[];
-  createData: (data: any) => Promise<any>;
-  updateData: (data: any) => Promise<any>;
-  deleteData: (id: any) => Promise<void>;
-  loading: Boolean;
+export type PageContextType<T> = {
+  data: T[];
+  createData: (item: T) => Promise<T | null>;
+  updateData: (item: T) => Promise<T | null>;
+  deleteData: (item: string) => Promise<boolean>;
+  loading: boolean;
 };
 
 export interface Option {
